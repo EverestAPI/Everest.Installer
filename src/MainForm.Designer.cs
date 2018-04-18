@@ -195,9 +195,8 @@
             this.MainExeStatusLabel.Location = new System.Drawing.Point(32, 64);
             this.MainExeStatusLabel.Margin = new System.Windows.Forms.Padding(1, 4, 1, 0);
             this.MainExeStatusLabel.Name = "MainExeStatusLabel";
-            this.MainExeStatusLabel.Size = new System.Drawing.Size(56, 21);
+            this.MainExeStatusLabel.Size = new System.Drawing.Size(0, 21);
             this.MainExeStatusLabel.TabIndex = 3;
-            this.MainExeStatusLabel.Text = "Status:";
             // 
             // MainInstallButton
             // 

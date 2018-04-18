@@ -60,13 +60,12 @@ namespace MonoMod.Installer {
             return this;
         }
 
-        public DrawablePolygon Reverse() {
+        public override void Reverse() {
             if (Points == null || Points.Length < 2)
-                return this;
+                return;
             List<PointF> points = new List<PointF>(Points);
             points.Reverse();
             Points = points.ToArray();
-            return this;
         }
 
     }

@@ -62,7 +62,6 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
@@ -79,13 +78,7 @@
     <Compile Include="src\CustomControls\CustomListBox.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="src\CustomControls\ModalForm.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="src\CustomControls\CustomTextBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="src\CustomControls\ModalForm.Ext.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="src\ProgressShapes.cs" />
@@ -118,9 +111,14 @@
     <Compile Include="src\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="src\Extensions\TaskbarExt.cs" />
+    <Compile Include="src\Utils\LogWriter.cs" />
+    <Compile Include="src\Utils\MonoModExt.cs" />
     <Compile Include="src\Utils\MonoMod__OldName__.cs" />
     <Compile Include="src\Utils\Platform.cs" />
     <Compile Include="src\Utils\PlatformHelper.cs" />
+    <Compile Include="src\Utils\RelinkFailedException.cs" />
+    <Compile Include="src\Utils\RelinkTargetNotFoundException.cs" />
+    <Compile Include="src\Utils\StringInjectExtension.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -131,9 +129,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="src\CustomControls\ModalForm.resx">
-      <DependentUpon>ModalForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="src\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -173,6 +168,99 @@
     <Content Include="Content\shape_download.svg" />
     <Content Include="Content\shape_test.svg" />
     <Content Include="icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- cecil -->
+    <Compile Include="cecil\Mono\*.cs" />
+    <Compile Include="cecil\Mono.Cecil.Cil\*.cs" />
+    <Compile Include="cecil\Mono.Cecil.Metadata\*.cs" />
+    <Compile Include="cecil\Mono.Cecil.PE\*.cs" />
+    <Compile Include="cecil\Mono.Collections.Generic\*.cs" />
+    <Compile Include="cecil\Mono.Security.Cryptography\*.cs" />
+    <Compile Include="cecil\Mono.Cecil\ArrayType.cs" />
+    <Compile Include="cecil\Mono.Cecil\AssemblyDefinition.cs" />
+    <Compile Include="cecil\Mono.Cecil\AssemblyFlags.cs" />
+    <Compile Include="cecil\Mono.Cecil\AssemblyHashAlgorithm.cs" />
+    <Compile Include="cecil\Mono.Cecil\AssemblyLinkedResource.cs" />
+    <Compile Include="cecil\Mono.Cecil\AssemblyNameDefinition.cs" />
+    <Compile Include="cecil\Mono.Cecil\AssemblyNameReference.cs" />
+    <Compile Include="cecil\Mono.Cecil\AssemblyReader.cs" />
+    <Compile Include="cecil\Mono.Cecil\AssemblyWriter.cs" />
+    <Compile Include="cecil\Mono.Cecil\BaseAssemblyResolver.cs" />
+    <Compile Include="cecil\Mono.Cecil\CallSite.cs" />
+    <Compile Include="cecil\Mono.Cecil\Consts.cs" />
+    <Compile Include="cecil\Mono.Cecil\CustomAttribute.cs" />
+    <Compile Include="cecil\Mono.Cecil\DefaultAssemblyResolver.cs" />
+    <Compile Include="cecil\Mono.Cecil\EmbeddedResource.cs" />
+    <Compile Include="cecil\Mono.Cecil\EventAttributes.cs" />
+    <Compile Include="cecil\Mono.Cecil\EventDefinition.cs" />
+    <Compile Include="cecil\Mono.Cecil\EventReference.cs" />
+    <Compile Include="cecil\Mono.Cecil\ExportedType.cs" />
+    <Compile Include="cecil\Mono.Cecil\FieldAttributes.cs" />
+    <Compile Include="cecil\Mono.Cecil\FieldDefinition.cs" />
+    <Compile Include="cecil\Mono.Cecil\FieldReference.cs" />
+    <Compile Include="cecil\Mono.Cecil\FileAttributes.cs" />
+    <Compile Include="cecil\Mono.Cecil\FunctionPointerType.cs" />
+    <Compile Include="cecil\Mono.Cecil\GenericInstanceMethod.cs" />
+    <Compile Include="cecil\Mono.Cecil\GenericInstanceType.cs" />
+    <Compile Include="cecil\Mono.Cecil\GenericParameter.cs" />
+    <Compile Include="cecil\Mono.Cecil\GenericParameterAttributes.cs" />
+    <Compile Include="cecil\Mono.Cecil\IConstantProvider.cs" />
+    <Compile Include="cecil\Mono.Cecil\ICustomAttributeProvider.cs" />
+    <Compile Include="cecil\Mono.Cecil\IGenericInstance.cs" />
+    <Compile Include="cecil\Mono.Cecil\IGenericParameterProvider.cs" />
+    <Compile Include="cecil\Mono.Cecil\IMarshalInfoProvider.cs" />
+    <Compile Include="cecil\Mono.Cecil\IMemberDefinition.cs" />
+    <Compile Include="cecil\Mono.Cecil\IMetadataScope.cs" />
+    <Compile Include="cecil\Mono.Cecil\IMetadataTokenProvider.cs" />
+    <Compile Include="cecil\Mono.Cecil\IMethodSignature.cs" />
+    <Compile Include="cecil\Mono.Cecil\Import.cs" />
+    <Compile Include="cecil\Mono.Cecil\LinkedResource.cs" />
+    <Compile Include="cecil\Mono.Cecil\ManifestResourceAttributes.cs" />
+    <Compile Include="cecil\Mono.Cecil\MarshalInfo.cs" />
+    <Compile Include="cecil\Mono.Cecil\MemberDefinitionCollection.cs" />
+    <Compile Include="cecil\Mono.Cecil\MemberReference.cs" />
+    <Compile Include="cecil\Mono.Cecil\MetadataResolver.cs" />
+    <Compile Include="cecil\Mono.Cecil\MetadataSystem.cs" />
+    <Compile Include="cecil\Mono.Cecil\MethodAttributes.cs" />
+    <Compile Include="cecil\Mono.Cecil\MethodCallingConvention.cs" />
+    <Compile Include="cecil\Mono.Cecil\MethodDefinition.cs" />
+    <Compile Include="cecil\Mono.Cecil\MethodImplAttributes.cs" />
+    <Compile Include="cecil\Mono.Cecil\MethodReference.cs" />
+    <Compile Include="cecil\Mono.Cecil\MethodReturnType.cs" />
+    <Compile Include="cecil\Mono.Cecil\MethodSemanticsAttributes.cs" />
+    <Compile Include="cecil\Mono.Cecil\MethodSpecification.cs" />
+    <Compile Include="cecil\Mono.Cecil\Modifiers.cs" />
+    <Compile Include="cecil\Mono.Cecil\ModuleDefinition.cs" />
+    <Compile Include="cecil\Mono.Cecil\ModuleKind.cs" />
+    <Compile Include="cecil\Mono.Cecil\ModuleReference.cs" />
+    <Compile Include="cecil\Mono.Cecil\NativeType.cs" />
+    <Compile Include="cecil\Mono.Cecil\ParameterAttributes.cs" />
+    <Compile Include="cecil\Mono.Cecil\ParameterDefinition.cs" />
+    <Compile Include="cecil\Mono.Cecil\ParameterDefinitionCollection.cs" />
+    <Compile Include="cecil\Mono.Cecil\ParameterReference.cs" />
+    <Compile Include="cecil\Mono.Cecil\PinnedType.cs" />
+    <Compile Include="cecil\Mono.Cecil\PInvokeAttributes.cs" />
+    <Compile Include="cecil\Mono.Cecil\PInvokeInfo.cs" />
+    <Compile Include="cecil\Mono.Cecil\PointerType.cs" />
+    <Compile Include="cecil\Mono.Cecil\PropertyAttributes.cs" />
+    <Compile Include="cecil\Mono.Cecil\PropertyDefinition.cs" />
+    <Compile Include="cecil\Mono.Cecil\PropertyReference.cs" />
+    <Compile Include="cecil\Mono.Cecil\ReferenceType.cs" />
+    <Compile Include="cecil\Mono.Cecil\Resource.cs" />
+    <Compile Include="cecil\Mono.Cecil\SecurityDeclaration.cs" />
+    <Compile Include="cecil\Mono.Cecil\SentinelType.cs" />
+    <Compile Include="cecil\Mono.Cecil\TargetRuntime.cs" />
+    <Compile Include="cecil\Mono.Cecil\Treatments.cs" />
+    <Compile Include="cecil\Mono.Cecil\TypeAttributes.cs" />
+    <Compile Include="cecil\Mono.Cecil\TypeDefinition.cs" />
+    <Compile Include="cecil\Mono.Cecil\TypeDefinitionCollection.cs" />
+    <Compile Include="cecil\Mono.Cecil\TypeParser.cs" />
+    <Compile Include="cecil\Mono.Cecil\TypeReference.cs" />
+    <Compile Include="cecil\Mono.Cecil\TypeSpecification.cs" />
+    <Compile Include="cecil\Mono.Cecil\TypeSystem.cs" />
+    <Compile Include="cecil\Mono.Cecil\VariantType.cs" />
+    <Compile Include="cecil\Mono.Cecil\WindowsRuntimeProjections.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">

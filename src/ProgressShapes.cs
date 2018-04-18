@@ -62,11 +62,21 @@ namespace MonoMod.Installer {
                         PenClosed = closed
                     }.RemoveDupes(),
                     Timing = timings[i],
+                    TimeDelay = 0.25f,
                     TimeScale = 2f
                 };
             };
         })());
-        public static DrawableMulti MonoMod => _MonoMod.Clone() as DrawableMulti;
+        public static DrawableMulti Install => _MonoMod.Clone() as DrawableMulti;
+        public static DrawableMulti Uninstall {
+            get {
+                DrawableMulti multi = _MonoMod.Clone() as DrawableMulti;
+                foreach (DrawablePolygonAnimSegment segment in multi.Shapes) {
+                    segment.Reverse();
+                }
+                return multi;
+            }
+        }
 
         private static DrawableMulti _Done = DrawablePath.FromDotgridSVG(
             Properties.Resources.shape_done,
@@ -85,6 +95,7 @@ namespace MonoMod.Installer {
                         PenClosed = closed
                     }.RemoveDupes(),
                     Timing = timings[i],
+                    TimeDelay = 0.5f,
                     TimeScale = 2f
                 };
             };

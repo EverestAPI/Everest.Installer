@@ -42,15 +42,13 @@ namespace MonoMod.Installer {
             }
             set {
                 if (string.IsNullOrEmpty(value)) {
-                    _CurrentExecutablePath = null;
-                    OnChangeCurrentExecutablePath?.Invoke(this, null);
+                    OnChangeCurrentExecutablePath?.Invoke(this, _CurrentExecutablePath = null);
                     return;
                 }
 
                 if (File.Exists(value) &&
                     value.ToLowerInvariant().EndsWith(ExecutableName.ToLowerInvariant())) {
-                    _CurrentExecutablePath = value;
-                    OnChangeCurrentExecutablePath?.Invoke(this, value);
+                    OnChangeCurrentExecutablePath?.Invoke(this, _CurrentExecutablePath = value);
                 }
             }
         }
@@ -73,10 +71,27 @@ namespace MonoMod.Installer {
             }
         }
 
+        private string _CurrentStatus;
+        public virtual string CurrentStatus {
+            get {
+                return _CurrentStatus ?? "";
+            }
+            set {
+                if (string.IsNullOrEmpty(value)) {
+                    _CurrentStatus = null;
+                    OnChangeCurrentStatus?.Invoke(this, null);
+                    return;
+                }
+
+                OnChangeCurrentStatus?.Invoke(this, _CurrentStatus = value);
+            }
+        }
+
         public virtual ModVersion CurrentInstallingModVersion { get; set; }
         public virtual Version CurrentInstalledModVersion { get; set; }
 
         public event Action<GameModInfo, string> OnChangeCurrentExecutablePath;
+        public event Action<GameModInfo, string> OnChangeCurrentStatus;
 
         public class ModVersion {
             public string Name;

@@ -1,5 +1,4 @@
-﻿using MonoMod.Installer.CustomControls;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -74,7 +73,7 @@ namespace MonoMod.Installer {
         private Thread _ModVersionsThread;
 
         public MainForm(GameModInfo info) {
-            Info = new CachedInfo(info);
+            Info = info;
             Modder = new GameModder(Info);
 
             InitializeComponent();
@@ -180,6 +179,9 @@ namespace MonoMod.Installer {
                 MainInstallButton.Enabled = valid;
                 MainUninstallButton.Enabled = valid;
             };
+            Info.OnChangeCurrentStatus += (info, status) => {
+                MainExeStatusLabel.Text = status ?? "";
+            };
             Info.CurrentExecutablePath = GameFinderManager.Find(Info);
 
             _ExeBrowseDialog = new OpenFileDialog() {
@@ -244,6 +246,7 @@ namespace MonoMod.Installer {
             if (_ProgressStatus != Status) {
                 _ProgressShapePrevious?.Dispose();
                 _ProgressShapePrevious = _ProgressShapeCurrent;
+                _ProgressShapePrevious?.Reverse();
                 switch (Status) {
                     default:
                         _ProgressShapeCurrent = null;
@@ -252,12 +255,10 @@ namespace MonoMod.Installer {
                         _ProgressShapeCurrent = ProgressShapes.Download;
                         break;
                     case InstallerStatus.Installing:
-                        _ProgressShapeCurrent = ProgressShapes.MonoMod;
+                        _ProgressShapeCurrent = ProgressShapes.Install;
                         break;
                     case InstallerStatus.Uninstalling:
-                        _ProgressShapeCurrent = ProgressShapes.MonoMod;
-                        foreach (DrawablePolygonAnimSegment segment in ((DrawableMulti) _ProgressShapeCurrent).Shapes)
-                            segment.Reverse();
+                        _ProgressShapeCurrent = ProgressShapes.Uninstall;
                         break;
                     case InstallerStatus.Done:
                         _ProgressShapeCurrent = ProgressShapes.Done;
@@ -471,18 +472,6 @@ namespace MonoMod.Installer {
             ProgressPanel.SlideIn();
 
             Modder.Uninstall();
-
-            ModalForm modal = ModalForm.Create(this, "Press OK.");
-
-            // modal.ShowDialog(this);
-            modal.Show();
-
-            /*
-            CustomPanel overlay = new CustomPanel();
-            overlay.BackColor = Color.FromArgb(127, 127, 0, 0);
-            overlay.Dock = DockStyle.Fill;
-            Controls.Add(overlay);
-            */
         }
 
         private void MinimizeButton_Click(object sender, EventArgs e) {

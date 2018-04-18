@@ -56,5 +56,21 @@ namespace MonoMod.Installer {
             return clone;
         }
 
+        public override void Reverse() {
+            if (Shapes == null)
+                return;
+            for (int i = 0; i < Shapes.Count; i++) {
+                Shapes[i]?.Reverse();
+            }
+        }
+
+        public override void Out() {
+            if (Shapes == null)
+                return;
+            for (int i = 0; i < Shapes.Count; i++) {
+                Shapes[i]?.Out();
+            }
+        }
+
     }
 }

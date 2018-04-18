@@ -7,7 +7,7 @@ using System.Text;
 namespace MonoMod.Installer {
     public abstract class Drawable : IDisposable, ICloneable {
 
-        public virtual bool IsActive => true;
+        public virtual bool IsActive { get; protected set; } = true;
 
         public virtual void Update(AnimationManager animMan) {
         }
@@ -17,6 +17,9 @@ namespace MonoMod.Installer {
         public abstract void Dispose();
 
         public abstract object Clone();
+
+        public virtual void Reverse() => IsActive = !IsActive;
+        public virtual void Out() => IsActive = false;
 
     }
 }

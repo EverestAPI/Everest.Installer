@@ -129,10 +129,16 @@ namespace MonoMod.Installer {
             };
         }
 
-        public DrawablePolygonAnimSegment Reverse() {
+        public override void Reverse() {
             Polygon.Reverse();
             Shrink = !Shrink;
-            return this;
+        }
+
+        public override void Out() {
+            if (Shrink)
+                return;
+            Polygon.Reverse();
+            Shrink = true;
         }
 
     }
