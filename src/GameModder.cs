@@ -24,47 +24,53 @@ namespace MonoMod.Installer {
 
         public void Install() {
             OnStart?.Invoke();
-            
             try {
+
+                if (Info.CurrentInstalledModVersion != null) {
+                    _Uninstall();
+                }
+
+                _Backup();
+            
                 _Install();
+
             } catch (Exception e) {
                 OnError?.Invoke(e);
                 if (Debugger.IsAttached)
                     throw;
                 return;
             }
-
             OnFinish?.Invoke();
-        }
-
-        private void _Install() {
-            
-
         }
 
         public void Uninstall() {
             OnStart?.Invoke();
-
             try {
+
                 _Uninstall();
+
             } catch (Exception e) {
                 OnError?.Invoke(e);
                 if (Debugger.IsAttached)
                     throw;
                 return;
             }
-
             OnFinish?.Invoke();
+        }
+
+        private void _Install() {
+
+
         }
 
         private void _Uninstall() {
 
         }
 
-        public void Backup(string file) {
+        private void _Backup() {
         }
 
-        public void Restore() {
+        private void _Restore() {
             /*
             string pathGame = Info.CurrentGamePath;
             string pathBackup = Path.Combine(pathGame, "orig");
@@ -135,11 +141,11 @@ namespace MonoMod.Installer {
             */
         }
 
-        public Stream Download(string url) {
+        private Stream _Download(string url) {
             return null;
         }
         
-        public void ModAssembly(string file) {
+        private void _ModAssembly(string file) {
             OnProgress?.Invoke(ProgressType.Install, file, 0, 1);
 
 

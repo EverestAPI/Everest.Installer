@@ -130,6 +130,7 @@ namespace MonoMod.Installer.Everest {
 
                 if (string.IsNullOrEmpty(value) || !File.Exists(value)) {
                     CurrentStatus = "";
+                    CurrentInstalledModVersion = null;
                     return;
                 }
 
@@ -139,6 +140,7 @@ namespace MonoMod.Installer.Everest {
                         if (t_Celeste == null) {
                             CurrentStatus = "Not Celeste!";
                             base.CurrentExecutablePath = null;
+                            CurrentInstalledModVersion = null;
                             return;
                         }
 
@@ -196,12 +198,20 @@ namespace MonoMod.Installer.Everest {
                             version = new Version(versionInts[0], versionInts[1], versionInts[2], versionInts[3]);
                         }
 
-                        string status = "Celeste " + version;
+                        string status = $"Celeste {version} {(game.AssemblyReferences.Any(r => r.Name == "FNA") ? "FNA" : "XNA")}";
 
+                        CurrentInstalledModVersion = null;
                         TypeDefinition t_Everest = game.GetType("Celeste.Mod.Everest");
                         if (t_Everest != null) {
                             // The first operation in .cctor is ldstr with the version string.
-                            status += " + Everest " + t_Everest.FindMethod("System.Void .cctor()").Body.Instructions[0].operand;
+                            string versionMod = (string) t_Everest.FindMethod("System.Void .cctor()").Body.Instructions[0].operand;
+                            int versionSplitIndex = versionMod.IndexOf('-');
+                            if (versionSplitIndex == -1) {
+                                CurrentInstalledModVersion = new Version(versionMod);
+                            } else {
+                                CurrentInstalledModVersion = new Version(versionMod.Substring(0, versionSplitIndex));
+                            }
+                            status = $"{status} + Everest {versionMod}";
                         }
 
                         CurrentStatus = status;
@@ -209,6 +219,7 @@ namespace MonoMod.Installer.Everest {
                 } catch (Exception e) {
                     CurrentStatus = "Error - check log";
                     base.CurrentExecutablePath = null;
+                    CurrentInstalledModVersion = null;
                     Console.WriteLine("Error determining status!");
                     Console.WriteLine(e.ToString());
                 }

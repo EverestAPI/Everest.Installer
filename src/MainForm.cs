@@ -255,10 +255,10 @@ namespace MonoMod.Installer {
                         _ProgressShapeCurrent = ProgressShapes.Download;
                         break;
                     case InstallerStatus.Installing:
-                        _ProgressShapeCurrent = ProgressShapes.Install;
+                        _ProgressShapeCurrent = ProgressShapes.Installing;
                         break;
                     case InstallerStatus.Uninstalling:
-                        _ProgressShapeCurrent = ProgressShapes.Uninstall;
+                        _ProgressShapeCurrent = ProgressShapes.Uninstalling;
                         break;
                     case InstallerStatus.Done:
                         _ProgressShapeCurrent = ProgressShapes.Done;
@@ -457,7 +457,7 @@ namespace MonoMod.Installer {
         private void InstallButton_Click(object sender, EventArgs e) {
             if (Status != InstallerStatus.Selecting)
                 return;
-            Status = InstallerStatus.Downloading;
+            Status = InstallerStatus.Transitioning;
             MainPanel.SlideOut();
             ProgressPanel.SlideIn();
 
@@ -467,7 +467,7 @@ namespace MonoMod.Installer {
         private void MainUninstallButton_Click(object sender, EventArgs e) {
             if (Status != InstallerStatus.Selecting)
                 return;
-            Status = InstallerStatus.Uninstalling;
+            Status = InstallerStatus.Transitioning;
             MainPanel.SlideOut();
             ProgressPanel.SlideIn();
 
@@ -504,6 +504,7 @@ namespace MonoMod.Installer {
 
         public enum InstallerStatus {
             Selecting,
+            Transitioning,
             Downloading,
             Installing,
             Uninstalling,

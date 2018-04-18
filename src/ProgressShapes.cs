@@ -67,8 +67,8 @@ namespace MonoMod.Installer {
                 };
             };
         })());
-        public static DrawableMulti Install => _MonoMod.Clone() as DrawableMulti;
-        public static DrawableMulti Uninstall {
+        public static DrawableMulti Installing => _MonoMod.Clone() as DrawableMulti;
+        public static DrawableMulti Uninstalling {
             get {
                 DrawableMulti multi = _MonoMod.Clone() as DrawableMulti;
                 foreach (DrawablePolygonAnimSegment segment in multi.Shapes) {
