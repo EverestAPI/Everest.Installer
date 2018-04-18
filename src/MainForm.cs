@@ -45,6 +45,7 @@ namespace MonoMod.Installer {
 
         public readonly GameModInfo Info;
         public readonly GameModder Modder;
+        private Thread _ModderThread;
 
         public InstallerStatus Status { get; private set; } = InstallerStatus.Selecting;
 
@@ -75,6 +76,40 @@ namespace MonoMod.Installer {
         public MainForm(GameModInfo info) {
             Info = info;
             Modder = new GameModder(Info);
+
+            Modder.OnStart += () => {
+                Status = InstallerStatus.Progressing;
+                _ProgressShapePrevious?.Dispose();
+                _ProgressShapePrevious = null;
+                _ProgressShapeCurrent?.Dispose();
+                _ProgressShapeCurrent = null;
+            };
+
+            Modder.OnProgress += (status, progress) => {
+                Status = InstallerStatus.Progressing;
+                switch (status) {
+                    default:
+                        ChangeProgressShape(null);
+                        break;
+                    case GameModder.Status.Download:
+                        ChangeProgressShape(ProgressShapes.Download);
+                        break;
+                    case GameModder.Status.Install:
+                    case GameModder.Status.Uninstall:
+                        ChangeProgressShape(ProgressShapes.MonoMod);
+                        break;
+                }
+            };
+
+            Modder.OnFinish += () => {
+                Status = InstallerStatus.Done;
+                ChangeProgressShape(ProgressShapes.Done);
+            };
+
+            Modder.OnError += (e) => {
+                Status = InstallerStatus.Error;
+                ChangeProgressShape(ProgressShapes.Error);
+            };
 
             InitializeComponent();
 
@@ -232,7 +267,7 @@ namespace MonoMod.Installer {
         private long _FrameStartPrev;
         private float _CurrentFrameTime;
 
-        private InstallerStatus _ProgressStatus;
+        private Drawable _ProgressShapeBase;
         private Drawable _ProgressShapePrevious;
         private Drawable _ProgressShapeCurrent;
 
@@ -242,30 +277,6 @@ namespace MonoMod.Installer {
                 cursor.X - Width / 2f,
                 cursor.Y - Height / 2f
             );
-
-            if (_ProgressStatus != Status) {
-                _ProgressShapePrevious?.Dispose();
-                _ProgressShapePrevious = _ProgressShapeCurrent;
-                _ProgressShapePrevious?.Reverse();
-                switch (Status) {
-                    default:
-                        _ProgressShapeCurrent = null;
-                        break;
-                    case InstallerStatus.Downloading:
-                        _ProgressShapeCurrent = ProgressShapes.Download;
-                        break;
-                    case InstallerStatus.Installing:
-                        _ProgressShapeCurrent = ProgressShapes.Installing;
-                        break;
-                    case InstallerStatus.Uninstalling:
-                        _ProgressShapeCurrent = ProgressShapes.Uninstalling;
-                        break;
-                    case InstallerStatus.Done:
-                        _ProgressShapeCurrent = ProgressShapes.Done;
-                        break;
-                }
-                _ProgressStatus = Status;
-            }
 
             if (_ProgressShapePrevious != null && _ProgressShapePrevious.IsActive) {
                 _ProgressShapePrevious.Update(AnimationManager);
@@ -277,6 +288,19 @@ namespace MonoMod.Installer {
                 _ProgressShapeCurrent?.Update(AnimationManager);
             }
 
+        }
+
+        private void ChangeProgressShape(Drawable shape) {
+            if (_ProgressShapeBase == shape)
+                return;
+            _ProgressShapeBase = shape;
+
+            _ProgressShapePrevious?.Dispose();
+
+            _ProgressShapePrevious = _ProgressShapeCurrent;
+            _ProgressShapePrevious?.Out();
+
+            _ProgressShapeCurrent = (Drawable) shape.Clone();
         }
 
         protected override void OnPaintBackground(PaintEventArgs e) {
@@ -319,7 +343,7 @@ namespace MonoMod.Installer {
                 MainPanel.Top + MainPanel.Height - versionSize.Height
             );
 
-            if (ProgressPanel.Visible && _ProgressShapeCurrent != null) {
+            if (ProgressPanel.Visible && (_ProgressShapeCurrent != null || _ProgressShapePrevious != null)) {
                 g.SmoothingMode = SmoothingMode.AntiAlias;
                 Matrix transformPrev = g.Transform;
 
@@ -328,7 +352,8 @@ namespace MonoMod.Installer {
                     Height * 0.5f + _BackgroundOffs.Y * -0.02f
                 );
 
-                _ProgressShapeCurrent.Draw(AnimationManager, g);
+                _ProgressShapePrevious?.Draw(AnimationManager, g);
+                _ProgressShapeCurrent?.Draw(AnimationManager, g);
 
                 g.Transform = transformPrev;
                 g.SmoothingMode = SmoothingMode.HighSpeed;
@@ -457,21 +482,23 @@ namespace MonoMod.Installer {
         private void InstallButton_Click(object sender, EventArgs e) {
             if (Status != InstallerStatus.Selecting)
                 return;
-            Status = InstallerStatus.Transitioning;
+            Status = InstallerStatus.Progressing;
             MainPanel.SlideOut();
             ProgressPanel.SlideIn();
 
-            Modder.Install();
+            _ModderThread = new Thread(Modder.Install);
+            _ModderThread.Start();
         }
 
         private void MainUninstallButton_Click(object sender, EventArgs e) {
             if (Status != InstallerStatus.Selecting)
                 return;
-            Status = InstallerStatus.Transitioning;
+            Status = InstallerStatus.Progressing;
             MainPanel.SlideOut();
             ProgressPanel.SlideIn();
 
-            Modder.Uninstall();
+            _ModderThread = new Thread(Modder.Uninstall);
+            _ModderThread.Start();
         }
 
         private void MinimizeButton_Click(object sender, EventArgs e) {
@@ -504,11 +531,9 @@ namespace MonoMod.Installer {
 
         public enum InstallerStatus {
             Selecting,
-            Transitioning,
-            Downloading,
-            Installing,
-            Uninstalling,
-            Done
+            Progressing,
+            Done,
+            Error,
         }
 
     }

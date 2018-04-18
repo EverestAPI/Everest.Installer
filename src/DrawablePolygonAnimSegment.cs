@@ -12,6 +12,7 @@ namespace MonoMod.Installer {
         public float Progress = 1f;
         public float Time;
         public bool Shrink = false;
+        public bool TimeAuto = true;
 
         public float? Fade = 1f;
         public float[] Timing;
@@ -34,7 +35,8 @@ namespace MonoMod.Installer {
                 Progress = (float) Math.Sin(t * Math.PI / 2f);
                 if (Shrink)
                     Progress = 1f - Progress;
-                Time += animMan.DeltaTime;
+                if (TimeAuto)
+                    Time += animMan.DeltaTime;
             }
 
             int lengthShort = (int) Math.Floor(1 + (Polygon.Points.Length - 1) * Progress);
@@ -120,6 +122,7 @@ namespace MonoMod.Installer {
                 Progress = Progress,
                 Time = 0f,
                 Shrink = Shrink,
+                TimeAuto = TimeAuto,
 
                 Fade = Fade,
                 Timing = Timing?.Clone() as float[],
@@ -139,6 +142,7 @@ namespace MonoMod.Installer {
                 return;
             Polygon.Reverse();
             Shrink = true;
+            TimeAuto = true;
         }
 
     }

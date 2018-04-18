@@ -13,7 +13,7 @@ namespace MonoMod.Installer {
             // no-op. We just need the class constructor to run.
         }
 
-        private static DrawableMulti _Download = DrawablePath.FromDotgridSVG(
+        public static DrawableMulti Download = DrawablePath.FromDotgridSVG(
             Properties.Resources.shape_download,
             pen: new Pen(Color.FromArgb(255, 255, 255, 255))
         ).ToMulti(new Func<DrawablePath.MultiGen>(() => {
@@ -34,9 +34,8 @@ namespace MonoMod.Installer {
                 };
             };
         })());
-        public static DrawableMulti Download => _Download.Clone() as DrawableMulti;
 
-        private static DrawableMulti _MonoMod = DrawablePath.FromDotgridSVG(
+        public static DrawableMulti MonoMod = DrawablePath.FromDotgridSVG(
             Properties.Resources.shape_monomod,
             pen: new Pen(Color.FromArgb(255, 255, 255, 255))
         ).ToMulti(new Func<DrawablePath.MultiGen>(() => {
@@ -67,18 +66,8 @@ namespace MonoMod.Installer {
                 };
             };
         })());
-        public static DrawableMulti Installing => _MonoMod.Clone() as DrawableMulti;
-        public static DrawableMulti Uninstalling {
-            get {
-                DrawableMulti multi = _MonoMod.Clone() as DrawableMulti;
-                foreach (DrawablePolygonAnimSegment segment in multi.Shapes) {
-                    segment.Reverse();
-                }
-                return multi;
-            }
-        }
 
-        private static DrawableMulti _Done = DrawablePath.FromDotgridSVG(
+        public static DrawableMulti Done = DrawablePath.FromDotgridSVG(
             Properties.Resources.shape_done,
             pen: new Pen(Color.FromArgb(255, 255, 255, 255))
         ).ToMulti(new Func<DrawablePath.MultiGen>(() => {
@@ -100,7 +89,30 @@ namespace MonoMod.Installer {
                 };
             };
         })());
-        public static DrawableMulti Done => _Done.Clone() as DrawableMulti;
+
+        public static DrawableMulti Error = DrawablePath.FromDotgridSVG(
+            Properties.Resources.shape_error,
+            pen: new Pen(Color.FromArgb(255, 255, 255, 255))
+        ).ToMulti(new Func<DrawablePath.MultiGen>(() => {
+            float[][] timings = new float[][] {
+                                new float[] { 0.1f, 0.08f }, // ! I
+                                new float[] { 0.18f, 0.12f }, // ! .
+                                new float[] { 0.0f, 0.3f }, // A
+            };
+            return (i, path, brush, pen, closed) => {
+                return new DrawablePolygonAnimSegment {
+                    Polygon = new DrawablePolygon {
+                        Points = path.PathPoints,
+                        Brush = brush,
+                        Pen = pen,
+                        PenClosed = closed
+                    }.RemoveDupes(),
+                    Timing = timings[i],
+                    TimeDelay = 0.5f,
+                    TimeScale = 2f
+                };
+            };
+        })());
 
     }
 }

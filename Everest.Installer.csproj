@@ -132,7 +132,9 @@
     <EmbeddedResource Include="src\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="Content\shape_backup.grid" />
     <None Include="Content\shape_done.grid" />
+    <None Include="Content\shape_error.grid" />
     <None Include="Content\shape_monomod.grid" />
     <None Include="Content\Renogare\Renogare-Regular.otf" />
     <None Include="Content\Selawik\selawk.ttf" />
@@ -162,7 +164,9 @@
   <ItemGroup>
     <None Include="Content\minimize.png" />
     <None Include="Content\close.png" />
+    <Content Include="Content\shape_backup.svg" />
     <Content Include="Content\shape_done.svg" />
+    <Content Include="Content\shape_error.svg" />
     <Content Include="Content\shape_monomod.svg" />
     <Content Include="Content\noise.png" />
     <Content Include="Content\shape_download.svg" />

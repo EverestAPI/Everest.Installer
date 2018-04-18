@@ -198,7 +198,7 @@ namespace MonoMod.Installer.Everest {
                             version = new Version(versionInts[0], versionInts[1], versionInts[2], versionInts[3]);
                         }
 
-                        string status = $"Celeste {version} {(game.AssemblyReferences.Any(r => r.Name == "FNA") ? "FNA" : "XNA")}";
+                        string status = $"Celeste {version}-{(game.AssemblyReferences.Any(r => r.Name == "FNA") ? "fna" : "xna")}";
 
                         CurrentInstalledModVersion = null;
                         TypeDefinition t_Everest = game.GetType("Celeste.Mod.Everest");

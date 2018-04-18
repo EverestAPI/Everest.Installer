@@ -148,4 +148,10 @@
   <data name="shape_done" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\content\shape_done.svg;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="shape_error" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\content\shape_error.svg;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="shape_backup" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\content\shape_backup.svg;System.Byte[], mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
 </root>

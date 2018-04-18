@@ -123,6 +123,16 @@ namespace MonoMod.Installer.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] shape_backup {
+            get {
+                object obj = ResourceManager.GetObject("shape_backup", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] shape_done {
             get {
                 object obj = ResourceManager.GetObject("shape_done", resourceCulture);
@@ -136,6 +146,16 @@ namespace MonoMod.Installer.Properties {
         internal static byte[] shape_download {
             get {
                 object obj = ResourceManager.GetObject("shape_download", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] shape_error {
+            get {
+                object obj = ResourceManager.GetObject("shape_error", resourceCulture);
                 return ((byte[])(obj));
             }
         }

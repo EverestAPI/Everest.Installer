@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace MonoMod.Installer {
     public class GameModder {
@@ -14,20 +15,19 @@ namespace MonoMod.Installer {
         public event Action OnFinish;
         public event Action<Exception> OnError;
 
-        public event Action<ProgressType, string, int, int> OnProgress = (type, text, current, max) => { };
-
-        public event Action<string> OnLog = text => Console.WriteLine(text);
+        public event Action<Status, float> OnProgress = (status, progress) => { };
 
         public GameModder(GameModInfo info) {
             Info = info;
         }
 
         public void Install() {
+            Console.WriteLine("STARTING: Install");
             OnStart?.Invoke();
             try {
 
                 if (Info.CurrentInstalledModVersion != null) {
-                    _Uninstall();
+                    _Restore();
                 }
 
                 _Backup();
@@ -35,110 +35,106 @@ namespace MonoMod.Installer {
                 _Install();
 
             } catch (Exception e) {
+                Console.WriteLine("ERROR: " + e);
                 OnError?.Invoke(e);
                 if (Debugger.IsAttached)
                     throw;
                 return;
             }
+            Console.WriteLine("FINISHED: Install");
             OnFinish?.Invoke();
         }
 
         public void Uninstall() {
+            Console.WriteLine("STARTING: Uninstall");
             OnStart?.Invoke();
             try {
 
-                _Uninstall();
+                _Restore();
 
             } catch (Exception e) {
+                Console.WriteLine("ERROR: " + e);
                 OnError?.Invoke(e);
                 if (Debugger.IsAttached)
                     throw;
                 return;
             }
+            Console.WriteLine("FINISHED: Uninstall");
             OnFinish?.Invoke();
         }
 
         private void _Install() {
+            OnProgress?.Invoke(Status.Install, 0f);
 
+            OnProgress?.Invoke(Status.Install, 1f);
+            Thread.Sleep(4000);
 
+            OnProgress?.Invoke(Status.Install, 1f);
         }
 
         private void _Uninstall() {
+            OnProgress?.Invoke(Status.Uninstall, 0f);
 
+            OnProgress?.Invoke(Status.Uninstall, 1f);
+            Thread.Sleep(4000);
+
+            OnProgress?.Invoke(Status.Uninstall, 1f);
         }
 
         private void _Backup() {
+            string root = Info.CurrentGamePath;
+            Console.WriteLine($"BACKUP @ {root}");
+            OnProgress?.Invoke(Status.Backup, 0f);
+
+            GameModInfo.ModBackup[] backups = Info.Backups;
+            for (int i = 0; i < backups.Length; i++) {
+                OnProgress?.Invoke(Status.Backup, (i + 1) / (float) backups.Length);
+
+                GameModInfo.ModBackup backup = backups[i];
+                string from = Path.Combine(root, backup.From);
+                string to = Path.Combine(root, backup.To);
+
+                if (!File.Exists(from)) {
+                    Console.WriteLine($"File not found, skipping: {backup.From}");
+                    continue;
+                }
+
+                Console.WriteLine($"{backup.From} -> {backup.To}");
+                string dir = Path.GetDirectoryName(to);
+                if (!Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+                File.Copy(from, to, true);
+            }
+
+            OnProgress?.Invoke(Status.Backup, 1f);
         }
 
         private void _Restore() {
-            /*
-            string pathGame = Info.CurrentGamePath;
-            string pathBackup = Path.Combine(pathGame, "orig");
-            if (!Directory.Exists(pathBackup))
-                return;
+            string root = Info.CurrentGamePath;
+            Console.WriteLine($"RESTORE @ {root}");
+            OnProgress?.Invoke(Status.Restore, 0f);
 
-            string[] files = Directory.GetFiles(pathGame);
-            OnProgress(ProgressType.Restore, "Removing leftover files", 0, files.Length);
-            for (int i = 0; i < files.Length; i++) {
-                string file = Path.GetFileName(files[i]);
-                if (!file.Contains(".mm."))
-                    continue;
-                OnLog($"Removing: {file}");
-                OnProgress(ProgressType.Restore, file, i, -1);
-                File.Delete(files[i]);
-            }
-
-            OnLog("Reverting...");
-            if (Info.CurrentInstalledModVersion != null)
-                OnLog($"Found previous mod installation: {Info.CurrentInstalledModVersion}");
-
-            OnProgress(ProgressType.Restore, "Reverting from backup", 0, files.Length);
             GameModInfo.ModBackup[] backups = Info.Backups;
             for (int i = 0; i < backups.Length; i++) {
-                GameModInfo.ModBackup backup = backups[i];
-                OnLog($"Reverting: {backup.To} -> {backup.From}");
-                OnProgress(ProgressType.Restore, $"Reverting: {backup.To}", i, -1);
+                OnProgress?.Invoke(Status.Restore, (i + 1) / (float) backups.Length);
 
-                string origPath = Path.Combine(pathGame, file);
-                File.Delete(origPath);
-                File.Move(files[i], origPath);
+                GameModInfo.ModBackup backup = backups[i];
+                string from = Path.Combine(root, backup.From);
+                string to = Path.Combine(root, backup.To);
+
+                if (!File.Exists(to)) {
+                    Console.WriteLine($"File not found, skipping: {backup.From}");
+                    continue;
+                }
+
+                Console.WriteLine($"{backup.From} <- {backup.To}");
+                string dir = Path.GetDirectoryName(from);
+                if (!Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+                File.Copy(to, from, true);
             }
 
-            ins.LogLine("Reloading Assembly-CSharp.dll");
-            ins.SetProgress("Reloading Assembly-CSharp.dll", files.Length);
-            ins.MainMod = new MonoModder() {
-                InputPath = ins.MainModIn
-            };
-            ins.MainMod.SetupETGModder();
-#if DEBUG
-            if (LogPath == null) {
-                ins.MainMod.Read(); // Read main module first
-                ins.MainMod.ReadMod(ins.MainModDir); // ... then mods
-                ins.MainMod.MapDependencies(); // ... then all dependencies
-            } else
-                using (FileStream fileStream = File.Open(LogPath, FileMode.Append)) {
-                    using (StreamWriter streamWriter = new StreamWriter(fileStream)) {
-                        ins.MainMod.Logger = (string s) => ins.OnActivity();
-                        ins.MainMod.Logger += (string s) => streamWriter.WriteLine(s);
-                        // MonoMod.MonoModSymbolReader.MDBDEBUG = true;
-#endif
-
-                        ins.MainMod.Read(); // Read main module first
-                        ins.MainMod.ReadMod(ins.MainModDir); // ... then mods
-                        ins.MainMod.MapDependencies(); // ... then all dependencies
-#if DEBUG
-                        Mono.Cecil.TypeDefinition etgMod = ins.MainMod.Module.GetType("ETGMod");
-                        if (etgMod != null) {
-                            for (int i = 0; i < etgMod.Methods.Count; i++) {
-                                Mono.Cecil.Cil.MethodBody body = etgMod.Methods[i].Body;
-                            }
-                        }
-                    }
-                }
-            ins.MainMod.Logger = null;
-#endif
-            ins.EndProgress("Uninstalling complete.");
-            */
+            OnProgress?.Invoke(Status.Restore, 1f);
         }
 
         private Stream _Download(string url) {
@@ -146,17 +142,16 @@ namespace MonoMod.Installer {
         }
         
         private void _ModAssembly(string file) {
-            OnProgress?.Invoke(ProgressType.Install, file, 0, 1);
 
 
-            OnProgress?.Invoke(ProgressType.Install, file, 1, 1);
         }
 
-        public enum ProgressType {
-            Install,
-            Restore,
+        public enum Status {
             Download,
-            Unzip
+            Backup,
+            Restore,
+            Install,
+            Uninstall
         }
 
     }
