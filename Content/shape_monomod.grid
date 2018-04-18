@@ -1,0 +1,202 @@
+{
+  "layers": [
+    [
+      {
+        "type": "line",
+        "verteces": [
+          {
+            "x": 75,
+            "y": 120
+          },
+          {
+            "x": 165,
+            "y": 120
+          }
+        ]
+      },
+      {
+        "type": "line",
+        "verteces": [
+          {
+            "x": 75,
+            "y": 180
+          },
+          {
+            "x": 105,
+            "y": 180
+          }
+        ]
+      },
+      {
+        "type": "line",
+        "verteces": [
+          {
+            "x": 180,
+            "y": 75
+          },
+          {
+            "x": 180,
+            "y": 165
+          }
+        ]
+      },
+      {
+        "type": "arc_r",
+        "verteces": [
+          {
+            "x": 120,
+            "y": 195
+          },
+          {
+            "x": 105,
+            "y": 210
+          },
+          {
+            "x": 120,
+            "y": 225
+          },
+          {
+            "x": 135,
+            "y": 210
+          },
+          {
+            "x": 120,
+            "y": 195
+          }
+        ]
+      },
+      {
+        "type": "line",
+        "verteces": [
+          {
+            "x": 120,
+            "y": 195
+          },
+          {
+            "x": 120,
+            "y": 135
+          }
+        ]
+      },
+      {
+        "type": "line",
+        "verteces": [
+          {
+            "x": 135,
+            "y": 180
+          },
+          {
+            "x": 225,
+            "y": 180
+          }
+        ]
+      },
+      {
+        "type": "line",
+        "verteces": [
+          {
+            "x": 195,
+            "y": 120
+          },
+          {
+            "x": 225,
+            "y": 120
+          }
+        ]
+      },
+      {
+        "type": "line",
+        "verteces": [
+          {
+            "x": 180,
+            "y": 195
+          },
+          {
+            "x": 180,
+            "y": 225
+          }
+        ]
+      },
+      {
+        "type": "line",
+        "verteces": [
+          {
+            "x": 105,
+            "y": 75
+          },
+          {
+            "x": 105,
+            "y": 90
+          }
+        ]
+      },
+      {
+        "type": "arc_r",
+        "verteces": [
+          {
+            "x": 105,
+            "y": 90
+          },
+          {
+            "x": 120,
+            "y": 105
+          },
+          {
+            "x": 135,
+            "y": 90
+          }
+        ]
+      },
+      {
+        "type": "line",
+        "verteces": [
+          {
+            "x": 135,
+            "y": 90
+          },
+          {
+            "x": 135,
+            "y": 75
+          }
+        ]
+      }
+    ],
+    [],
+    []
+  ],
+  "styles": [
+    {
+      "thickness": 12,
+      "strokeLinecap": "round",
+      "strokeLinejoin": "miter",
+      "color": "#fff",
+      "fill": "none",
+      "dash": [
+        0,
+        0
+      ]
+    },
+    {
+      "thickness": 5,
+      "strokeLinecap": "round",
+      "strokeLinejoin": "round",
+      "color": "#777",
+      "fill": "none",
+      "dash": [
+        0,
+        0
+      ]
+    },
+    {
+      "thickness": 5,
+      "strokeLinecap": "round",
+      "strokeLinejoin": "round",
+      "color": "#444",
+      "fill": "none",
+      "dash": [
+        0,
+        0
+      ]
+    }
+  ]
+}

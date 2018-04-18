@@ -1,0 +1,56 @@
+{
+  "layers": [
+    [
+      {
+        "type": "line",
+        "verteces": [
+          {
+            "x": 75,
+            "y": 120
+          },
+          {
+            "x": 165,
+            "y": 120
+          }
+        ]
+      }
+    ],
+    [],
+    []
+  ],
+  "styles": [
+    {
+      "thickness": 12,
+      "strokeLinecap": "round",
+      "strokeLinejoin": "miter",
+      "color": "#fff",
+      "fill": "none",
+      "dash": [
+        0,
+        0
+      ]
+    },
+    {
+      "thickness": 5,
+      "strokeLinecap": "round",
+      "strokeLinejoin": "round",
+      "color": "#777",
+      "fill": "none",
+      "dash": [
+        0,
+        0
+      ]
+    },
+    {
+      "thickness": 5,
+      "strokeLinecap": "round",
+      "strokeLinejoin": "round",
+      "color": "#444",
+      "fill": "none",
+      "dash": [
+        0,
+        0
+      ]
+    }
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "layers": [
+    [
+      {
+        "type": "line",
+        "verteces": [
+          {
+            "x": 120,
+            "y": 180
+          },
+          {
+            "x": 60,
+            "y": 180
+          },
+          {
+            "x": 150,
+            "y": 270
+          },
+          {
+            "x": 240,
+            "y": 180
+          },
+          {
+            "x": 150,
+            "y": 180
+          },
+          {
+            "x": 120,
+            "y": 150
+          },
+          {
+            "x": 120,
+            "y": 30
+          },
+          {
+            "x": 180,
+            "y": 30
+          },
+          {
+            "x": 180,
+            "y": 165
+          },
+          {
+            "x": 120,
+            "y": 165
+          },
+          {
+            "x": 120,
+            "y": 180
+          }
+        ]
+      }
+    ],
+    [],
+    []
+  ],
+  "styles": [
+    {
+      "thickness": 12,
+      "strokeLinecap": "round",
+      "strokeLinejoin": "round",
+      "color": "#fff",
+      "fill": "none",
+      "dash": [
+        0,
+        0
+      ],
+      "mirror_style": 0
+    },
+    {
+      "thickness": 5,
+      "strokeLinecap": "round",
+      "strokeLinejoin": "round",
+      "color": "#777",
+      "fill": "none",
+      "dash": [
+        0,
+        0
+      ],
+      "mirror_style": 0
+    },
+    {
+      "thickness": 5,
+      "strokeLinecap": "round",
+      "strokeLinejoin": "round",
+      "color": "#444",
+      "fill": "none",
+      "dash": [
+        0,
+        0
+      ],
+      "mirror_style": 0
+    }
+  ]
+}
