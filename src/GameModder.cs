@@ -231,7 +231,7 @@ namespace MonoMod.Installer {
                         }
 
                         OnProgress?.Invoke(Status.Download, (float) ((pos / progressScale) / (double) progressSize));
-                        Console.WriteLine(
+                        LogWriter.OnWriteLine?.Invoke(
                             "Downloading - " +
                             (int) (Math.Round(100D * ((pos / progressScale) / (double) progressSize))) + "%, " +
                             speed + " KiB/s"

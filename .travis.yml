@@ -1,0 +1,11 @@
+# sudo: required
+sudo: false
+dist: trusty
+language: csharp
+mono:
+  - latest
+solution: Everest.Installer.sln
+script:
+    - chmod a+x ./travis/replace-version.sh
+    - ./travis/replace-version.sh
+    - msbuild /p:Configuration=Release

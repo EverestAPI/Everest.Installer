@@ -105,6 +105,7 @@ namespace MonoMod.Installer {
                 Invoke(new Action(() => {
                     if (progress <= 0f) {
                         this.SetProgressState(TaskbarExt.TBPF.TBPF_INDETERMINATE);
+                        this.SetProgressValue(0, 1);
                     } else if (progress >= 1f) {
                         this.SetProgressState(TaskbarExt.TBPF.TBPF_NORMAL);
                         this.SetProgressValue(1, 1);
@@ -136,6 +137,7 @@ namespace MonoMod.Installer {
                     ProgressExitButton.Enabled = true;
                     ProgressExitButton.Visible = true;
                     this.SetProgressState(TaskbarExt.TBPF.TBPF_ERROR);
+                    this.SetProgressValue(1, 1);
                 }));
                 ChangeProgressShape(ProgressShapes.Error);
             };
