@@ -25,6 +25,8 @@
         private void InitializeComponent() {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.ProgressPanel = new MonoMod.Installer.CustomPanel();
+            this.ProgressExitButton = new MonoMod.Installer.CustomButton();
+            this.ProgressLaunchButton = new MonoMod.Installer.CustomButton();
             this.ProgressLogLineLabel = new MonoMod.Installer.CustomLabel();
             this.ProgressProgressLabel = new MonoMod.Installer.CustomLabel();
             this.MainPanel = new MonoMod.Installer.CustomPanel();
@@ -53,6 +55,8 @@
             // ProgressPanel
             // 
             this.ProgressPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.ProgressPanel.Controls.Add(this.ProgressExitButton);
+            this.ProgressPanel.Controls.Add(this.ProgressLaunchButton);
             this.ProgressPanel.Controls.Add(this.ProgressLogLineLabel);
             this.ProgressPanel.Controls.Add(this.ProgressProgressLabel);
             this.ProgressPanel.Location = new System.Drawing.Point(461, 130);
@@ -60,6 +64,44 @@
             this.ProgressPanel.Name = "ProgressPanel";
             this.ProgressPanel.Size = new System.Drawing.Size(458, 469);
             this.ProgressPanel.TabIndex = 4;
+            // 
+            // ProgressExitButton
+            // 
+            this.ProgressExitButton.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(59)))), ((int)(((byte)(45)))), ((int)(((byte)(74)))));
+            this.ProgressExitButton.Enabled = false;
+            this.ProgressExitButton.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(127)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.ProgressExitButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(127)))), ((int)(((byte)(59)))), ((int)(((byte)(45)))), ((int)(((byte)(74)))));
+            this.ProgressExitButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(127)))), ((int)(((byte)(119)))), ((int)(((byte)(105)))), ((int)(((byte)(134)))));
+            this.ProgressExitButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.ProgressExitButton.Font = new System.Drawing.Font("Selawik Semilight", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.ProgressExitButton.ForeColor = System.Drawing.Color.White;
+            this.ProgressExitButton.Location = new System.Drawing.Point(295, 427);
+            this.ProgressExitButton.Name = "ProgressExitButton";
+            this.ProgressExitButton.Size = new System.Drawing.Size(123, 31);
+            this.ProgressExitButton.TabIndex = 10;
+            this.ProgressExitButton.Text = "Exit";
+            this.ProgressExitButton.UseVisualStyleBackColor = false;
+            this.ProgressExitButton.Visible = false;
+            this.ProgressExitButton.Click += new System.EventHandler(this.ProgressExitButton_Click);
+            // 
+            // ProgressLaunchButton
+            // 
+            this.ProgressLaunchButton.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(59)))), ((int)(((byte)(45)))), ((int)(((byte)(74)))));
+            this.ProgressLaunchButton.Enabled = false;
+            this.ProgressLaunchButton.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(127)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.ProgressLaunchButton.FlatAppearance.MouseDownBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(127)))), ((int)(((byte)(59)))), ((int)(((byte)(45)))), ((int)(((byte)(74)))));
+            this.ProgressLaunchButton.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(127)))), ((int)(((byte)(119)))), ((int)(((byte)(105)))), ((int)(((byte)(134)))));
+            this.ProgressLaunchButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.ProgressLaunchButton.Font = new System.Drawing.Font("Selawik Semilight", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.ProgressLaunchButton.ForeColor = System.Drawing.Color.White;
+            this.ProgressLaunchButton.Location = new System.Drawing.Point(36, 427);
+            this.ProgressLaunchButton.Name = "ProgressLaunchButton";
+            this.ProgressLaunchButton.Size = new System.Drawing.Size(249, 31);
+            this.ProgressLaunchButton.TabIndex = 9;
+            this.ProgressLaunchButton.Text = "Launch";
+            this.ProgressLaunchButton.UseVisualStyleBackColor = false;
+            this.ProgressLaunchButton.Visible = false;
+            this.ProgressLaunchButton.Click += new System.EventHandler(this.ProgressLaunchButton_Click);
             // 
             // ProgressLogLineLabel
             // 
@@ -348,6 +390,8 @@
         private CustomButton CloseButton;
         private CustomButton MinimizeButton;
         private CustomLabel ProgressLogLineLabel;
+        private CustomButton ProgressExitButton;
+        private CustomButton ProgressLaunchButton;
     }
 }
 

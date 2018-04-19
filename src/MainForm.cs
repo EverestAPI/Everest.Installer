@@ -47,7 +47,7 @@ namespace MonoMod.Installer {
         public readonly GameModder Modder;
         private Thread _ModderThread;
 
-        public InstallerStatus Status { get; private set; } = InstallerStatus.Selecting;
+        public InstallerStatus Status { get; private set; } = InstallerStatus.Prepare;
 
         public bool ShowFPS =
 #if DEBUG
@@ -78,7 +78,7 @@ namespace MonoMod.Installer {
             Modder = new GameModder(Info);
 
             Modder.OnStart += () => {
-                Status = InstallerStatus.Progressing;
+                Status = InstallerStatus.Progress;
                 _ProgressShapePrevious?.Dispose();
                 _ProgressShapePrevious = null;
                 _ProgressShapeCurrent?.Dispose();
@@ -86,7 +86,7 @@ namespace MonoMod.Installer {
             };
 
             Modder.OnProgress += (status, progress) => {
-                Status = InstallerStatus.Progressing;
+                Status = InstallerStatus.Progress;
                 switch (status) {
                     default:
                         ChangeProgressShape(null);
@@ -102,15 +102,41 @@ namespace MonoMod.Installer {
                         ChangeProgressShape(ProgressShapes.Backup);
                         break;
                 }
+                Invoke(new Action(() => {
+                    if (progress <= 0f) {
+                        this.SetProgressState(TaskbarExt.TBPF.TBPF_INDETERMINATE);
+                    } else if (progress >= 1f) {
+                        this.SetProgressState(TaskbarExt.TBPF.TBPF_NORMAL);
+                        this.SetProgressValue(1, 1);
+                    } else {
+                        this.SetProgressState(TaskbarExt.TBPF.TBPF_NORMAL);
+                        this.SetProgressValue((ulong) Math.Round(progress * 10000), 10000);
+                    }
+                }));
             };
 
             Modder.OnFinish += () => {
                 Status = InstallerStatus.Done;
+                Invoke(new Action(() => {
+                    CloseButton.Enabled = true;
+                    ProgressLaunchButton.Enabled = true;
+                    ProgressLaunchButton.Visible = true;
+                    ProgressExitButton.Enabled = true;
+                    ProgressExitButton.Visible = true;
+                }));
                 ChangeProgressShape(ProgressShapes.Done);
             };
 
             Modder.OnError += e => {
                 Status = InstallerStatus.Error;
+                Invoke(new Action(() => {
+                    CloseButton.Enabled = true;
+                    ProgressLaunchButton.Enabled = false;
+                    ProgressLaunchButton.Visible = true;
+                    ProgressExitButton.Enabled = true;
+                    ProgressExitButton.Visible = true;
+                    this.SetProgressState(TaskbarExt.TBPF.TBPF_ERROR);
+                }));
                 ChangeProgressShape(ProgressShapes.Error);
             };
 
@@ -373,7 +399,6 @@ namespace MonoMod.Installer {
                 g.DrawString((1f / AnimationManager.CurrentFrameTime).ToString("F3", System.Globalization.CultureInfo.InvariantCulture), _Font, _FPSBrush, 0, 0);
                 g.DrawString((1f / _CurrentFrameTime).ToString("F3", System.Globalization.CultureInfo.InvariantCulture), _Font, _FPSBrush, 0, 14 * (AutoScaleFactor.Height));
             }
-
         }
 
         private void _DownloadModVersions() {
@@ -490,25 +515,40 @@ namespace MonoMod.Installer {
         }
 
         private void InstallButton_Click(object sender, EventArgs e) {
-            if (Status != InstallerStatus.Selecting)
+            if (Status != InstallerStatus.Prepare)
                 return;
-            Status = InstallerStatus.Progressing;
+            Status = InstallerStatus.Progress;
             MainPanel.SlideOut();
             ProgressPanel.SlideIn();
+            CloseButton.Enabled = false;
 
             _ModderThread = new Thread(Modder.Install);
             _ModderThread.Start();
         }
 
         private void MainUninstallButton_Click(object sender, EventArgs e) {
-            if (Status != InstallerStatus.Selecting)
+            if (Status != InstallerStatus.Prepare)
                 return;
-            Status = InstallerStatus.Progressing;
+            Status = InstallerStatus.Progress;
             MainPanel.SlideOut();
             ProgressPanel.SlideIn();
+            CloseButton.Enabled = false;
 
             _ModderThread = new Thread(Modder.Uninstall);
             _ModderThread.Start();
+        }
+
+        private void ProgressLaunchButton_Click(object sender, EventArgs e) {
+            if (Status != InstallerStatus.Done)
+                return;
+            Process.Start(Info.CurrentExecutablePath).Dispose();
+            Close();
+        }
+
+        private void ProgressExitButton_Click(object sender, EventArgs e) {
+            if (Status != InstallerStatus.Done && Status != InstallerStatus.Error)
+                return;
+            Close();
         }
 
         private void MinimizeButton_Click(object sender, EventArgs e) {
@@ -517,6 +557,8 @@ namespace MonoMod.Installer {
         }
 
         private void CloseButton_Click(object sender, EventArgs e) {
+            if (Status == InstallerStatus.Progress)
+                return;
             Close();
         }
 
@@ -540,8 +582,8 @@ namespace MonoMod.Installer {
         }
 
         public enum InstallerStatus {
-            Selecting,
-            Progressing,
+            Prepare,
+            Progress,
             Done,
             Error,
         }
