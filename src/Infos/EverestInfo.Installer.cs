@@ -99,6 +99,7 @@ namespace MonoMod.Installer.Everest {
                 }
 
                 hookReadKey.Undo();
+                hookLazyLoadAssembly.Undo();
             }
         }
 

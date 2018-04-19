@@ -109,9 +109,16 @@ namespace MonoMod.Installer {
                 ChangeProgressShape(ProgressShapes.Done);
             };
 
-            Modder.OnError += (e) => {
+            Modder.OnError += e => {
                 Status = InstallerStatus.Error;
                 ChangeProgressShape(ProgressShapes.Error);
+            };
+
+            LogWriter.OnWriteLine += line => {
+                if (ProgressLogLineLabel != null)
+                    ProgressLogLineLabel.BeginInvoke(new Action(() => {
+                        ProgressLogLineLabel.Text = line;
+                    }));
             };
 
             InitializeComponent();

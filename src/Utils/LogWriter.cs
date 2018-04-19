@@ -11,6 +11,9 @@ namespace MonoMod.Installer {
         public TextWriter STDOUT;
         public TextWriter File;
 
+        // Modification that allows us to display the last line in the UI.
+        internal static event Action<string> OnWriteLine;
+
         public override Encoding Encoding {
             get {
                 return STDOUT?.Encoding ?? File?.Encoding;
@@ -27,6 +30,7 @@ namespace MonoMod.Installer {
             STDOUT?.WriteLine(value);
             File?.WriteLine(value);
             File?.Flush();
+            OnWriteLine?.Invoke(value);
         }
 
         public override void Write(char value) {

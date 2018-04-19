@@ -25,6 +25,7 @@
         private void InitializeComponent() {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.ProgressPanel = new MonoMod.Installer.CustomPanel();
+            this.ProgressLogLineLabel = new MonoMod.Installer.CustomLabel();
             this.ProgressProgressLabel = new MonoMod.Installer.CustomLabel();
             this.MainPanel = new MonoMod.Installer.CustomPanel();
             this.MainVersionPanel = new MonoMod.Installer.CustomPanel();
@@ -52,12 +53,25 @@
             // ProgressPanel
             // 
             this.ProgressPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.ProgressPanel.Controls.Add(this.ProgressLogLineLabel);
             this.ProgressPanel.Controls.Add(this.ProgressProgressLabel);
             this.ProgressPanel.Location = new System.Drawing.Point(461, 130);
             this.ProgressPanel.Margin = new System.Windows.Forms.Padding(1, 1, 1, 0);
             this.ProgressPanel.Name = "ProgressPanel";
             this.ProgressPanel.Size = new System.Drawing.Size(458, 469);
             this.ProgressPanel.TabIndex = 4;
+            // 
+            // ProgressLogLineLabel
+            // 
+            this.ProgressLogLineLabel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.ProgressLogLineLabel.Font = new System.Drawing.Font("Selawik Semilight", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.ProgressLogLineLabel.ForeColor = System.Drawing.Color.White;
+            this.ProgressLogLineLabel.Location = new System.Drawing.Point(32, 396);
+            this.ProgressLogLineLabel.Margin = new System.Windows.Forms.Padding(1, 4, 1, 0);
+            this.ProgressLogLineLabel.Name = "ProgressLogLineLabel";
+            this.ProgressLogLineLabel.Size = new System.Drawing.Size(390, 21);
+            this.ProgressLogLineLabel.TabIndex = 8;
+            this.ProgressLogLineLabel.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // ProgressProgressLabel
             // 
@@ -333,6 +347,7 @@
         private CustomPanel MainVersionPanel;
         private CustomButton CloseButton;
         private CustomButton MinimizeButton;
+        private CustomLabel ProgressLogLineLabel;
     }
 }
 

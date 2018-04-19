@@ -26,7 +26,7 @@ namespace MonoMod.Installer {
         }
 
         public void Install() {
-            Console.WriteLine("STARTING: Install");
+            Console.WriteLine("Starting installation");
             OnStart?.Invoke();
             try {
 
@@ -45,38 +45,40 @@ namespace MonoMod.Installer {
                 Console.WriteLine();
 
             } catch (Exception e) {
-                Console.WriteLine("ERROR: " + e);
+                Console.WriteLine(e);
+                Console.WriteLine("Error! Please check installer-log.txt");
                 OnError?.Invoke(e);
                 if (Debugger.IsAttached)
                     throw;
                 return;
             }
-            Console.WriteLine("FINISHED: Install");
+            Console.WriteLine("Finished installing!");
             Console.WriteLine();
             OnFinish?.Invoke();
         }
 
         public void Uninstall() {
-            Console.WriteLine("STARTING: Uninstall");
+            Console.WriteLine("Starting uninstall");
             OnStart?.Invoke();
             try {
 
                 _Restore();
 
             } catch (Exception e) {
-                Console.WriteLine("ERROR: " + e);
+                Console.WriteLine(e);
+                Console.WriteLine("Error! Please check installer-log.txt");
                 OnError?.Invoke(e);
                 if (Debugger.IsAttached)
                     throw;
                 return;
             }
-            Console.WriteLine("FINISHED: Uninstall");
+            Console.WriteLine("Finished uninstalling!");
             OnFinish?.Invoke();
         }
 
         private void _DownloadAndUnpack() {
             string root = Info.CurrentGamePath;
-            Console.WriteLine($"DOWNLOAD & UNPACK");
+            Console.WriteLine($"STEP: DOWNLOAD & UNPACK");
 
             byte[] zipData = _Download(Info.CurrentInstallingModVersion.URL);
 
@@ -105,7 +107,7 @@ namespace MonoMod.Installer {
         }
 
         private void _Install() {
-            Console.WriteLine("INSTALL");
+            Console.WriteLine("STEP: INSTALL");
             OnProgress?.Invoke(Status.Install, 0f);
 
             Info.Install(progress => OnProgress?.Invoke(Status.Install, progress));
@@ -115,7 +117,7 @@ namespace MonoMod.Installer {
 
         private void _Backup() {
             string root = Info.CurrentGamePath;
-            Console.WriteLine($"BACKUP @ {root}");
+            Console.WriteLine($"STEP: BACKUP @ {root}");
             OnProgress?.Invoke(Status.Backup, 0f);
 
             GameModInfo.ModBackup[] backups = Info.Backups;
@@ -143,7 +145,7 @@ namespace MonoMod.Installer {
 
         private void _Restore() {
             string root = Info.CurrentGamePath;
-            Console.WriteLine($"RESTORE @ {root}");
+            Console.WriteLine($"STEP: RESTORE @ {root}");
             OnProgress?.Invoke(Status.Restore, 0f);
 
             GameModInfo.ModBackup[] backups = Info.Backups;
@@ -223,21 +225,17 @@ namespace MonoMod.Installer {
 
                         td = (DateTime.Now - timeLast);
                         if (td.TotalMilliseconds > 100) {
-                            speed = (int) ((readForSpeed / 1024D) / (double) td.TotalSeconds);
+                            speed = (int) ((readForSpeed / 1024D) / td.TotalSeconds);
                             readForSpeed = 0;
                             timeLast = DateTime.Now;
                         }
 
                         OnProgress?.Invoke(Status.Download, (float) ((pos / progressScale) / (double) progressSize));
-                        // Handy snippet from the old ETGMod installer.
-                        /*
-                        ins.SetProgress(
+                        Console.WriteLine(
                             "Downloading - " +
-                                (int) (Math.Round(100D * ((double) (pos / progressScale) / (double) progressSize))) + "%, " +
-                                speed + " KiB/s",
-                            (int) (pos / progressScale)
+                            (int) (Math.Round(100D * ((pos / progressScale) / (double) progressSize))) + "%, " +
+                            speed + " KiB/s"
                         );
-                        */
                     }
 
                 }
@@ -252,11 +250,6 @@ namespace MonoMod.Installer {
             Console.WriteLine($"Downloaded {logSize} KiB in {logTime} seconds.");
 
             return data;
-        }
-        
-        private void _ModAssembly(string file) {
-
-
         }
 
         public enum Status {
