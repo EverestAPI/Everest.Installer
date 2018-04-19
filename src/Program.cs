@@ -19,11 +19,14 @@ namespace MonoMod.Installer {
                 STDOUT = Console.Out,
                 File = fileWriter
             }) {
+                Console.SetOut(logWriter);
 
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 Application.Run(new MainForm(new Everest.EverestInfo()));
 
+                Console.SetOut(logWriter.STDOUT);
+                logWriter.STDOUT = null;
             }
         }
     }

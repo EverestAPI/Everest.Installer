@@ -93,6 +93,8 @@ namespace MonoMod.Installer {
         public event Action<GameModInfo, string> OnChangeCurrentExecutablePath;
         public event Action<GameModInfo, string> OnChangeCurrentStatus;
 
+        public abstract void Install(Action<float> progress);
+
         public class ModVersion {
             public string Name;
             public string URL;

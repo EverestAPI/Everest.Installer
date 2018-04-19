@@ -13,6 +13,30 @@ namespace MonoMod.Installer {
             // no-op. We just need the class constructor to run.
         }
 
+        public static DrawableMulti Backup = DrawablePath.FromDotgridSVG(
+            Properties.Resources.shape_backup,
+            pen: new Pen(Color.FromArgb(255, 255, 255, 255))
+        ).ToMulti(new Func<DrawablePath.MultiGen>(() => {
+            float[][] timings = new float[][] {
+                                new float[] { 0.0f, 0.2f }, // O out
+                                new float[] { 0.0f, 0.2f }, // I top right
+                                new float[] { 0.0f, 0.2f }, // I left
+                                new float[] { 0.1f, 0.1f }, // O in
+            };
+            return (i, path, brush, pen, closed) => {
+                return new DrawablePolygonAnimSegment {
+                    Polygon = new DrawablePolygon {
+                        Points = path.PathPoints,
+                        Brush = brush,
+                        Pen = pen,
+                        PenClosed = closed
+                    }.RemoveDupes(),
+                    Timing = timings[i],
+                    TimeScale = 1f
+                };
+            };
+        })());
+
         public static DrawableMulti Download = DrawablePath.FromDotgridSVG(
             Properties.Resources.shape_download,
             pen: new Pen(Color.FromArgb(255, 255, 255, 255))
@@ -30,7 +54,7 @@ namespace MonoMod.Installer {
                     }.RemoveDupes(),
                     Fade = null,
                     Timing = timings[i],
-                    TimeScale = 2f
+                    TimeScale = 1f
                 };
             };
         })());
@@ -61,8 +85,7 @@ namespace MonoMod.Installer {
                         PenClosed = closed
                     }.RemoveDupes(),
                     Timing = timings[i],
-                    TimeDelay = 0.25f,
-                    TimeScale = 2f
+                    TimeScale = 0.5f
                 };
             };
         })());
@@ -84,8 +107,7 @@ namespace MonoMod.Installer {
                         PenClosed = closed
                     }.RemoveDupes(),
                     Timing = timings[i],
-                    TimeDelay = 0.5f,
-                    TimeScale = 2f
+                    TimeScale = 1f
                 };
             };
         })());
@@ -95,9 +117,9 @@ namespace MonoMod.Installer {
             pen: new Pen(Color.FromArgb(255, 255, 255, 255))
         ).ToMulti(new Func<DrawablePath.MultiGen>(() => {
             float[][] timings = new float[][] {
-                                new float[] { 0.1f, 0.08f }, // ! I
-                                new float[] { 0.18f, 0.12f }, // ! .
-                                new float[] { 0.0f, 0.3f }, // A
+                                new float[] { 0.2f, 0.08f }, // ! I
+                                new float[] { 0.28f, 0.12f }, // ! .
+                                new float[] { 0.0f, 0.2f }, // A
             };
             return (i, path, brush, pen, closed) => {
                 return new DrawablePolygonAnimSegment {
@@ -108,8 +130,7 @@ namespace MonoMod.Installer {
                         PenClosed = closed
                     }.RemoveDupes(),
                     Timing = timings[i],
-                    TimeDelay = 0.5f,
-                    TimeScale = 2f
+                    TimeScale = 1f
                 };
             };
         })());

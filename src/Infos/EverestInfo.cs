@@ -7,11 +7,13 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace MonoMod.Installer.Everest {
-    public class EverestInfo : GameModInfo {
+    public partial class EverestInfo : GameModInfo {
 
         public readonly static Random RNG = new Random();
 

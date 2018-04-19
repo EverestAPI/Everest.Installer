@@ -95,8 +95,11 @@ namespace MonoMod.Installer {
                         ChangeProgressShape(ProgressShapes.Download);
                         break;
                     case GameModder.Status.Install:
-                    case GameModder.Status.Uninstall:
                         ChangeProgressShape(ProgressShapes.MonoMod);
+                        break;
+                    case GameModder.Status.Backup:
+                    case GameModder.Status.Restore:
+                        ChangeProgressShape(ProgressShapes.Backup);
                         break;
                 }
             };
@@ -300,7 +303,7 @@ namespace MonoMod.Installer {
             _ProgressShapePrevious = _ProgressShapeCurrent;
             _ProgressShapePrevious?.Out();
 
-            _ProgressShapeCurrent = (Drawable) shape.Clone();
+            _ProgressShapeCurrent = shape?.Clone() as Drawable;
         }
 
         protected override void OnPaintBackground(PaintEventArgs e) {
@@ -375,7 +378,7 @@ namespace MonoMod.Installer {
                 MainVersionList.EndUpdate();
             }));
 
-            GameModInfo.ModVersion custom = new GameModInfo.ModVersion { Name = "Custom .zip", URL = "|custom|" };
+            GameModInfo.ModVersion custom = new GameModInfo.ModVersion { Name = "Custom .zip", URL = "|local|" };
 
             try {
                 // This also caches the ModVersions in the CachedInfo.
@@ -510,7 +513,7 @@ namespace MonoMod.Installer {
             Close();
         }
 
-        private int _PreviousModVersionIndex;
+        private int _PreviousModVersionIndex = -1;
         private void MainVersionList_SelectedIndexChanged(object sender, EventArgs e) {
             if (_PreviousModVersionIndex == MainVersionList.SelectedIndex)
                 return;
@@ -519,7 +522,7 @@ namespace MonoMod.Installer {
             if (version == null)
                 return;
 
-            if (version.URL == "|custom|") {
+            if (version.URL == "|local|") {
                 if (_ModBrowseDialog.ShowDialog(this) != DialogResult.OK)
                     MainVersionList.SelectedIndex = _PreviousModVersionIndex;
                 return;

@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 
@@ -28,11 +32,17 @@ namespace MonoMod.Installer {
 
                 if (Info.CurrentInstalledModVersion != null) {
                     _Restore();
+                    Console.WriteLine();
                 }
 
                 _Backup();
-            
+                Console.WriteLine();
+
+                _DownloadAndUnpack();
+                Console.WriteLine();
+
                 _Install();
+                Console.WriteLine();
 
             } catch (Exception e) {
                 Console.WriteLine("ERROR: " + e);
@@ -42,6 +52,7 @@ namespace MonoMod.Installer {
                 return;
             }
             Console.WriteLine("FINISHED: Install");
+            Console.WriteLine();
             OnFinish?.Invoke();
         }
 
@@ -63,22 +74,43 @@ namespace MonoMod.Installer {
             OnFinish?.Invoke();
         }
 
-        private void _Install() {
-            OnProgress?.Invoke(Status.Install, 0f);
+        private void _DownloadAndUnpack() {
+            string root = Info.CurrentGamePath;
+            Console.WriteLine($"DOWNLOAD & UNPACK");
 
-            OnProgress?.Invoke(Status.Install, 1f);
-            Thread.Sleep(4000);
+            byte[] zipData = _Download(Info.CurrentInstallingModVersion.URL);
 
-            OnProgress?.Invoke(Status.Install, 1f);
+            OnProgress?.Invoke(Status.Unpack, 0f);
+
+            using (MemoryStream ms = new MemoryStream(zipData))
+            using (ZipArchive zip = new ZipArchive(ms)) {
+                int i = 0;
+                foreach (ZipArchiveEntry entry in zip.Entries) {
+                    OnProgress?.Invoke(Status.Unpack, (i + 1) / (float) zip.Entries.Count);
+                    string to = Path.Combine(root, entry.Name);
+                    string toParent = Path.GetDirectoryName(to);
+                    Console.WriteLine($"{entry.Name} -> {to}");
+                    if (!Directory.Exists(toParent))
+                        Directory.CreateDirectory(toParent);
+                    if (File.Exists(to))
+                        File.Delete(to);
+                    using (FileStream fs = File.OpenWrite(to))
+                    using (Stream compressed = entry.Open())
+                        compressed.CopyTo(fs);
+                    i++;
+                }
+            }
+
+            OnProgress?.Invoke(Status.Unpack, 1f);
         }
 
-        private void _Uninstall() {
-            OnProgress?.Invoke(Status.Uninstall, 0f);
+        private void _Install() {
+            Console.WriteLine("INSTALL");
+            OnProgress?.Invoke(Status.Install, 0f);
 
-            OnProgress?.Invoke(Status.Uninstall, 1f);
-            Thread.Sleep(4000);
+            Info.Install(progress => OnProgress?.Invoke(Status.Install, progress));
 
-            OnProgress?.Invoke(Status.Uninstall, 1f);
+            OnProgress?.Invoke(Status.Install, 1f);
         }
 
         private void _Backup() {
@@ -137,8 +169,89 @@ namespace MonoMod.Installer {
             OnProgress?.Invoke(Status.Restore, 1f);
         }
 
-        private Stream _Download(string url) {
-            return null;
+        private byte[] _Download(string url) {
+            if (url.StartsWith("|local|")) {
+                Console.WriteLine($"Reading local file {url}");
+                return File.ReadAllBytes(url.Substring(7));
+            }
+
+            // The following blob of code comes from the old ETGMod.Installer.
+
+            byte[] data = null;
+
+            Console.WriteLine($"Downloading {url}");
+
+            DateTime timeStart = DateTime.Now;
+            using (WebClient wc = new WebClient()) {
+                using (Stream s = wc.OpenRead(url)) {
+                    long sLength;
+                    if (s.CanSeek) {
+                        // Mono
+                        sLength = s.Length;
+                    } else {
+                        // .NET
+                        HttpWebRequest request = (HttpWebRequest) WebRequest.Create(url);
+                        request.UserAgent = $"MonoMod.Installer {Assembly.GetEntryAssembly().GetName().Version}";
+                        request.Method = "HEAD";
+                        using (HttpWebResponse response = (HttpWebResponse) request.GetResponse()) {
+                            sLength = response.ContentLength;
+                        }
+                    }
+                    Console.WriteLine($"{sLength} bytes");
+                    data = new byte[sLength];
+
+                    long progressSize = sLength;
+                    int progressScale = 1;
+                    while (progressSize > int.MaxValue) {
+                        progressScale *= 10;
+                        progressSize = sLength / progressScale;
+                    }
+
+                    OnProgress?.Invoke(Status.Download, 0f);
+
+                    DateTime timeLast = timeStart;
+
+                    int read;
+                    int readForSpeed = 0;
+                    int pos = 0;
+                    int speed = 0;
+                    TimeSpan td;
+                    while (pos < data.Length) {
+                        read = s.Read(data, pos, Math.Min(2048, data.Length - pos));
+                        pos += read;
+                        readForSpeed += read;
+
+                        td = (DateTime.Now - timeLast);
+                        if (td.TotalMilliseconds > 100) {
+                            speed = (int) ((readForSpeed / 1024D) / (double) td.TotalSeconds);
+                            readForSpeed = 0;
+                            timeLast = DateTime.Now;
+                        }
+
+                        OnProgress?.Invoke(Status.Download, (float) ((pos / progressScale) / (double) progressSize));
+                        // Handy snippet from the old ETGMod installer.
+                        /*
+                        ins.SetProgress(
+                            "Downloading - " +
+                                (int) (Math.Round(100D * ((double) (pos / progressScale) / (double) progressSize))) + "%, " +
+                                speed + " KiB/s",
+                            (int) (pos / progressScale)
+                        );
+                        */
+                    }
+
+                }
+            }
+
+            OnProgress?.Invoke(Status.Download, 1f);
+
+            string logSize = (data.Length / 1024D).ToString(CultureInfo.InvariantCulture);
+            logSize = logSize.Substring(0, Math.Min(logSize.IndexOf('.') + 3, logSize.Length));
+            string logTime = (DateTime.Now - timeStart).TotalSeconds.ToString(CultureInfo.InvariantCulture);
+            logTime = logTime.Substring(0, Math.Min(logTime.IndexOf('.') + 3, logTime.Length));
+            Console.WriteLine($"Downloaded {logSize} KiB in {logTime} seconds.");
+
+            return data;
         }
         
         private void _ModAssembly(string file) {
@@ -147,11 +260,11 @@ namespace MonoMod.Installer {
         }
 
         public enum Status {
-            Download,
             Backup,
             Restore,
+            Download,
+            Unpack,
             Install,
-            Uninstall
         }
 
     }

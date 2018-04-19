@@ -10,6 +10,7 @@ namespace MonoMod.Installer {
         public DrawablePolygon Polygon;
 
         public float Progress = 1f;
+        private float ProgressF => Shrink ? 1f - Progress : Progress;
         public float Time;
         public bool Shrink = false;
         public bool TimeAuto = true;
@@ -23,7 +24,7 @@ namespace MonoMod.Installer {
         private float _Progress;
         private PointF[] _Points;
 
-        public override bool IsActive => !Shrink || (Shrink && Progress >= 1f);
+        public override bool IsActive => !Shrink || (Shrink && Progress < 1f);
 
         public override void Update(AnimationManager animMan) {
             Polygon?.Update(animMan);
@@ -33,13 +34,11 @@ namespace MonoMod.Installer {
             if (Timing != null) {
                 float t = Math.Max(0f, Math.Min((Time - Timing[0] * TimeScale - TimeDelay) / Timing[1] / TimeScale, 1f));
                 Progress = (float) Math.Sin(t * Math.PI / 2f);
-                if (Shrink)
-                    Progress = 1f - Progress;
                 if (TimeAuto)
                     Time += animMan.DeltaTime;
             }
 
-            int lengthShort = (int) Math.Floor(1 + (Polygon.Points.Length - 1) * Progress);
+            int lengthShort = (int) Math.Floor(1 + (Polygon.Points.Length - 1) * ProgressF);
             int lengthLong = Math.Min(lengthShort + 1, Polygon.Points.Length);
             int lengthArr = lengthLong;
             if (lengthLong <= 1)
@@ -48,8 +47,8 @@ namespace MonoMod.Installer {
                 _Points = new PointF[lengthArr];
             }
 
-            if (_Progress != Progress) {
-                _Progress = Progress;
+            if (_Progress != ProgressF) {
+                _Progress = ProgressF;
                 animMan.Repaint = true;
             }
 
@@ -66,7 +65,7 @@ namespace MonoMod.Installer {
 
             Array.Copy(Polygon.Points, _Points, lengthShort);
 
-            float endStep = (1 + (Polygon.Points.Length - 1) * Progress) - lengthShort;
+            float endStep = (1 + (Polygon.Points.Length - 1) * ProgressF) - lengthShort;
             PointF a = Polygon.Points[lengthShort - 1];
             PointF b = Polygon.Points[lengthLong - 1];
             _Points[lengthLong - 1] = new PointF(
@@ -86,7 +85,7 @@ namespace MonoMod.Installer {
                 SolidBrush brush = Polygon.Brush as SolidBrush;
                 if (Fade != null && brush != null) {
                     brush.Color = Color.FromArgb(
-                        Math.Min(255, (int) Math.Round(255f * Fade.Value * Progress * 3f)),
+                        Math.Min(255, (int) Math.Round(255f * Fade.Value * ProgressF * 3f)),
                         brush.Color.R,
                         brush.Color.G,
                         brush.Color.B
@@ -97,7 +96,7 @@ namespace MonoMod.Installer {
             if (Polygon.Pen != null) {
                 if (Fade != null) {
                     Polygon.Pen.Color = Color.FromArgb(
-                        Math.Min(255, (int) Math.Round(255f * Fade.Value * Progress * 3f)),
+                        Math.Min(255, (int) Math.Round(255f * Fade.Value * ProgressF * 3f)),
                         Polygon.Pen.Color.R,
                         Polygon.Pen.Color.G,
                         Polygon.Pen.Color.B
@@ -142,6 +141,20 @@ namespace MonoMod.Installer {
                 return;
             Polygon.Reverse();
             Shrink = true;
+
+            if (Timing == null) {
+                Timing = new float[] { 0f, 0.4f };
+                TimeScale = 1f;
+            } else {
+                Timing[0] = 0f;
+            }
+
+            Time = Timing[1] - Time;
+            if (Time < 0f)
+                Time = 0f;
+            TimeScale *= 0.5f;
+
+            Progress = 0f;
             TimeAuto = true;
         }
 

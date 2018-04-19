@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MonoMod.Installer</RootNamespace>
     <AssemblyName>Everest.Installer</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
@@ -39,6 +39,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -49,6 +50,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>MonoMod.Installer.Program</StartupObject>
@@ -63,6 +65,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -81,6 +84,7 @@
     <Compile Include="src\CustomControls\CustomTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="src\Infos\EverestInfo.Installer.cs" />
     <Compile Include="src\ProgressShapes.cs" />
     <Compile Include="src\Extensions\StringExt.cs" />
     <Compile Include="src\Extensions\FormsExt.cs" />
@@ -99,7 +103,6 @@
     <Compile Include="src\Finders\GameFinder.cs" />
     <Compile Include="src\GameFinderManager.cs" />
     <Compile Include="src\GameModder.cs" />
-    <Compile Include="src\Infos\CachedInfo.cs" />
     <Compile Include="src\Infos\EverestInfo.cs" />
     <Compile Include="src\Infos\GameModInfo.cs" />
     <Compile Include="src\MainForm.cs">
@@ -111,6 +114,26 @@
     <Compile Include="src\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="src\Extensions\TaskbarExt.cs" />
+    <Compile Include="src\RuntimeDetour\Detour.cs" />
+    <Compile Include="src\RuntimeDetour\DetourManager.cs" />
+    <Compile Include="src\RuntimeDetour\DetourNativePlatforms.cs" />
+    <Compile Include="src\RuntimeDetour\DetourRuntimePlatforms.cs" />
+    <Compile Include="src\RuntimeDetour\Hook.cs" />
+    <Compile Include="src\RuntimeDetour\HookManager.cs" />
+    <Compile Include="src\RuntimeDetour\IDetour.cs" />
+    <Compile Include="src\RuntimeDetour\ILCopying\AccessCache.cs" />
+    <Compile Include="src\RuntimeDetour\ILCopying\AccessTools.cs" />
+    <Compile Include="src\RuntimeDetour\ILCopying\ByteBuffer.cs" />
+    <Compile Include="src\RuntimeDetour\ILCopying\CodeInstruction.cs" />
+    <Compile Include="src\RuntimeDetour\ILCopying\CodeTranspiler.cs" />
+    <Compile Include="src\RuntimeDetour\ILCopying\Emitter.cs" />
+    <Compile Include="src\RuntimeDetour\ILCopying\ILInstruction.cs" />
+    <Compile Include="src\RuntimeDetour\ILCopying\MethodCopier.cs" />
+    <Compile Include="src\RuntimeDetour\ILCopying\Traverse.cs" />
+    <Compile Include="src\RuntimeDetour\NativeDetour.cs" />
+    <Compile Include="src\Utils\DynamicMethodHelper.cs" />
+    <Compile Include="src\Utils\Extensions.cs" />
+    <Compile Include="src\Utils\FastReflectionHelper.cs" />
     <Compile Include="src\Utils\LogWriter.cs" />
     <Compile Include="src\Utils\MonoModExt.cs" />
     <Compile Include="src\Utils\MonoMod__OldName__.cs" />
@@ -132,6 +155,7 @@
     <EmbeddedResource Include="src\MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="app.config" />
     <None Include="Content\shape_backup.grid" />
     <None Include="Content\shape_done.grid" />
     <None Include="Content\shape_error.grid" />
@@ -154,6 +178,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <None Include="src\RuntimeDetour\ILCopying\README.md" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Content\background.png" />
