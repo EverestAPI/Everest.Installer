@@ -41,9 +41,20 @@ namespace MonoMod.Installer {
             }) {
                 Console.SetOut(logWriter);
 
-                Application.EnableVisualStyles();
-                Application.SetCompatibleTextRenderingDefault(false);
-                Application.Run(new MainForm(new Everest.EverestInfo()));
+                GameModInfo info = new Everest.EverestInfo();
+
+                try {
+                    Application.EnableVisualStyles();
+                    Application.SetCompatibleTextRenderingDefault(false);
+                    Application.Run(new MainForm(info));
+                } catch (Exception e) {
+                    Console.WriteLine(e);
+                    if (Debugger.IsAttached) {
+                        throw;
+                    } else {
+                        MessageBox.Show($"{info.ModInstallerName} has encountered a critical error.\nPlease submit your installer-log.txt\nIt's located next to the installer .exe", info.ModInstallerName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
 
                 Console.SetOut(logWriter.STDOUT);
                 logWriter.STDOUT = null;
