@@ -26,7 +26,7 @@ namespace MonoMod.Installer {
             string asmNameWanted = Assembly.GetExecutingAssembly().GetName().Name + ".exe";
             if (Path.GetFileName(asmLoc) != asmNameWanted) {
                 string asmTmp = Path.Combine(Path.GetTempPath(), asmNameWanted);
-                File.Copy(asmLoc, asmTmp);
+                File.Copy(asmLoc, asmTmp, true);
                 Process.Start(asmTmp, "--log " + log);
                 return;
             }
