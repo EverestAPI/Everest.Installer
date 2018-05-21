@@ -96,6 +96,7 @@ namespace MonoMod.Installer.Everest {
         public override Dictionary<string, string> GameIDs {
             get {
                 return new Dictionary<string, string>() {
+                    { "local", "Celeste.exe" },
                     { "steam", "Celeste" }
                 };
             }

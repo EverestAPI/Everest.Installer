@@ -27,6 +27,8 @@ namespace MonoMod.Installer {
 
         public void Install() {
             Console.WriteLine("Starting installation");
+            Console.WriteLine($"Installing: {Info.CurrentInstallingModVersion.Name}");
+            Console.WriteLine($"To: {Info.CurrentGamePath}");
             OnStart?.Invoke();
             try {
 
@@ -41,10 +43,18 @@ namespace MonoMod.Installer {
                 _DownloadAndUnpack();
                 Console.WriteLine();
 
+                // Sneaky step: Copy the installer.
+                try {
+                    string installerPath = Assembly.GetEntryAssembly().Location;
+                    File.Copy(installerPath, Path.Combine(Info.CurrentGamePath, Path.GetFileName(installerPath)), true);
+                } catch {
+                }
+
                 _Install();
                 Console.WriteLine();
 
             } catch (Exception e) {
+                Console.WriteLine($"Failed installing {Info.CurrentInstallingModVersion.Name}");
                 Console.WriteLine(e);
                 Console.WriteLine("Error! Please check installer-log.txt");
                 OnError?.Invoke(e);

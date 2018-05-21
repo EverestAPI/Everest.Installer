@@ -42,6 +42,7 @@ namespace MonoMod.Installer {
                 Console.SetOut(logWriter);
 
                 GameModInfo info = new Everest.EverestInfo();
+                Console.WriteLine($"{info.ModInstallerName} v{Assembly.GetEntryAssembly().GetName().Version}");
 
                 try {
                     Application.EnableVisualStyles();

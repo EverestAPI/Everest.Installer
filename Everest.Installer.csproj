@@ -81,6 +81,7 @@
     <Compile Include="src\CustomControls\CustomTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="src\Finders\LocalFinder.cs" />
     <Compile Include="src\Infos\EverestInfo.Installer.cs" />
     <Compile Include="src\ProgressShapes.cs" />
     <Compile Include="src\Extensions\StringExt.cs" />
