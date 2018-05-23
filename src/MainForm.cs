@@ -564,8 +564,8 @@ namespace MonoMod.Installer {
         }
 
         private void CloseButton_Click(object sender, EventArgs e) {
-            if (Status == InstallerStatus.Progress)
-                return;
+            if (_ModderThread != null && _ModderThread.IsAlive)
+                _ModderThread.Abort();
             Close();
         }
 

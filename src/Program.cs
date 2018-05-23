@@ -15,7 +15,7 @@ namespace MonoMod.Installer {
         /// </summary>
         [STAThread]
         static void Main(string[] args) {
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
 
             const string logDefaultName = "installer-log.txt";
             string log = Path.GetFullPath(logDefaultName);
