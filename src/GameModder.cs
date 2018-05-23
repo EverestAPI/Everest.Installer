@@ -121,7 +121,10 @@ namespace MonoMod.Installer {
         }
 
         public void DownloadMod(string url) {
-            Console.WriteLine("Starting download");
+            Console.WriteLine("Starting mod download");
+
+            while (string.IsNullOrEmpty(Info.CurrentGamePath))
+                Thread.Sleep(100);
 
             Uri uri = new Uri(url);
 
@@ -132,8 +135,6 @@ namespace MonoMod.Installer {
                 Directory.CreateDirectory(modRoot);
 
             string modPath = Path.Combine(modRoot, Path.GetFileName(uri.AbsolutePath));
-
-            Console.WriteLine($"Downloading mod");
 
             OnStart?.Invoke();
             try {
