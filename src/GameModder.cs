@@ -123,9 +123,6 @@ namespace MonoMod.Installer {
         public void DownloadMod(string url) {
             Console.WriteLine("Starting mod download");
 
-            while (string.IsNullOrEmpty(Info.CurrentGamePath))
-                Thread.Sleep(100);
-
             Uri uri = new Uri(url);
 
             string modRoot = Info.ModsDir;
