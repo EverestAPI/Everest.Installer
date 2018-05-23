@@ -17,35 +17,13 @@ namespace MonoMod.Installer.Everest {
 
         public readonly static Random RNG = new Random();
 
-        public override string GameName {
-            get {
-                return "Celeste";
-            }
-        }
+        public override string GameName => "Celeste";
+        public override string ModName => "Everest";
+        public override string ModURIProtocol => "Everest";
+        public override string ModInstallerName => "Everest.Installer";
 
-        public override string ModName {
-            get {
-                return "Everest";
-            }
-        }
-
-        public override string ModInstallerName {
-            get {
-                return "Everest.Installer";
-            }
-        }
-
-        public override Image HeaderImage {
-            get {
-                return Properties.Resources.header;
-            }
-        }
-
-        public override Image BackgroundImage {
-            get {
-                return Properties.Resources.background;
-            }
-        }
+        public override Image HeaderImage => Properties.Resources.header;
+        public override Image BackgroundImage => Properties.Resources.background;
 
         public override string ExecutableDir {
             get {

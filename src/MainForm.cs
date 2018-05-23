@@ -29,9 +29,9 @@ namespace MonoMod.Installer {
             }
         }
 
-        public readonly AnimationManager AnimationManager;
+        public readonly string VersionString;
 
-        public readonly static Random RNG = new Random();
+        public readonly AnimationManager AnimationManager;
 
         private Image BackgroundNoise;
 
@@ -46,8 +46,9 @@ namespace MonoMod.Installer {
         public readonly GameModInfo Info;
         public readonly GameModder Modder;
         private Thread _ModderThread;
-
         public InstallerStatus Status { get; private set; } = InstallerStatus.Prepare;
+
+        public string AutoDownloadMod;
 
         public bool ShowFPS =
 #if DEBUG
@@ -68,8 +69,6 @@ namespace MonoMod.Installer {
 
         private OpenFileDialog _ExeBrowseDialog;
         private OpenFileDialog _ModBrowseDialog;
-
-        public readonly string VersionString;
 
         private Thread _ModVersionsThread;
 
@@ -288,15 +287,21 @@ namespace MonoMod.Installer {
                 _PreviousModVersionIndex = MainVersionList.SelectedIndex;
             };
 
+            if (!string.IsNullOrEmpty(AutoDownloadMod)) {
+                if (Status != InstallerStatus.Prepare)
+                    return;
+                Status = InstallerStatus.Progress;
+                MainPanel.SlideOut();
+                ProgressPanel.SlideIn();
+
+                _ModderThread = new Thread(() => Modder.DownloadMod(AutoDownloadMod));
+                _ModderThread.Start();
+                return;
+            }
+
             _ModVersionsThread = new Thread(_DownloadModVersions);
             _ModVersionsThread.IsBackground = true;
             _ModVersionsThread.Start();
-
-            /*
-            this.SetProgressState(TaskbarExt.TBPF.TBPF_NORMAL);
-            this.SetProgressValue(5, 10);
-            this.SetOverlayIcon(Icon);
-            */
         }
 
 

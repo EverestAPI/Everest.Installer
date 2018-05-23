@@ -27,11 +27,8 @@ namespace MonoMod.Installer {
         }
         public abstract Dictionary<string, string> GameIDs { get; }
 
-        public virtual string CacheDir {
-            get {
-                return "ModInstallerCache";
-            }
-        }
+        public virtual string ModURIProtocol => "";
+        public virtual string ModsDir => "Mods";
 
         public abstract List<ModVersion> ModVersions { get; }
 

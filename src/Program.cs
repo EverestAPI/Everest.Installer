@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
@@ -14,14 +15,29 @@ namespace MonoMod.Installer {
         /// </summary>
         [STAThread]
         static void Main(string[] args) {
-            string log = Path.GetFullPath("installer-log.txt");
-            if (args.Length >= 2 && args[0] == "--log") {
-                StringBuilder logBuilt = new StringBuilder();
-                for (int i = 1; i < args.Length; i++)
-                    logBuilt.Append(args[i]).Append(" ");
-                log = logBuilt.ToString().Trim();
-            }
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
+            const string logDefaultName = "installer-log.txt";
+            string log = Path.GetFullPath(logDefaultName);
+
+            Queue<string> argsQueue = new Queue<string>(args);
+            Queue<string> argsLateQueue = new Queue<string>();
+            while (argsQueue.Count > 0) {
+                string arg = argsQueue.Dequeue();
+
+                if (arg == "--log" && argsQueue.Count >= 1) {
+                    StringBuilder logBuilt = new StringBuilder();
+                    while (argsQueue.Count > 0)
+                        logBuilt.Append(argsQueue.Dequeue()).Append(" ");
+                    log = logBuilt.ToString().Trim();
+
+                } else {
+                    argsLateQueue.Enqueue(arg);
+                }
+            }
+            argsQueue = argsLateQueue;
+
+            // If the assembly name doesn't match, re-run the installer from a temporary location.
             string asmLoc = Assembly.GetEntryAssembly().Location;
             string asmNameWanted = Assembly.GetExecutingAssembly().GetName().Name + ".exe";
             if (Path.GetFileName(asmLoc) != asmNameWanted) {
@@ -29,6 +45,14 @@ namespace MonoMod.Installer {
                 File.Copy(asmLoc, asmTmp, true);
                 Process.Start(asmTmp, "--log " + log);
                 return;
+            }
+
+            // Check if log is writable, otherwise write log to user dir.
+            try {
+                using (Stream tmpStream = File.OpenWrite(log)) {
+                }
+            } catch {
+                log = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), logDefaultName);
             }
 
             if (File.Exists(log))
@@ -42,12 +66,32 @@ namespace MonoMod.Installer {
                 Console.SetOut(logWriter);
 
                 GameModInfo info = new Everest.EverestInfo();
+
                 Console.WriteLine($"{info.ModInstallerName} v{Assembly.GetEntryAssembly().GetName().Version}");
 
                 try {
                     Application.EnableVisualStyles();
                     Application.SetCompatibleTextRenderingDefault(false);
-                    Application.Run(new MainForm(info));
+
+                    MainForm form = new MainForm(info);
+
+                    while (argsQueue.Count > 0) {
+                        string arg = argsQueue.Dequeue();
+
+                        if (arg == "--uri" && argsQueue.Count >= 1) {
+                            arg = argsQueue.Dequeue();
+
+                            if (arg.ToLowerInvariant().StartsWith(info.ModURIProtocol.ToLowerInvariant() + ":"))
+                                arg = arg.Substring(info.ModURIProtocol.Length + 1);
+                            
+                            if (arg.StartsWith("http://") || arg.StartsWith("https://")) {
+                                // Automatic mod .zip download.
+                                form.AutoDownloadMod = arg.Split(',')[0];
+                            }
+                        }
+                    }
+
+                    Application.Run(form);
                 } catch (Exception e) {
                     Console.WriteLine(e);
                     if (Debugger.IsAttached) {

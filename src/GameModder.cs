@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -44,10 +45,30 @@ namespace MonoMod.Installer {
                 Console.WriteLine();
 
                 // Sneaky step: Copy the installer.
+                string installerPath = null;
                 try {
-                    string installerPath = Assembly.GetEntryAssembly().Location;
-                    File.Copy(installerPath, Path.Combine(Info.CurrentGamePath, Path.GetFileName(installerPath)), true);
+                    string installerTmpPath = Assembly.GetEntryAssembly().Location;
+                    installerPath = Path.Combine(Info.CurrentGamePath, Path.GetFileName(installerTmpPath));
+                    File.Copy(installerTmpPath, installerPath, true);
                 } catch {
+                    installerPath = null;
+                }
+                // Sneaky step: Set up URI handler.
+                if (!string.IsNullOrEmpty(Info.ModURIProtocol) &&
+                    !string.IsNullOrEmpty(Info.ModsDir)) {
+                    try {
+                        RegistryKey regClasses = Registry
+                            .CurrentUser
+                            ?.OpenSubKey("Software", true)
+                            ?.OpenSubKey("Classes", true);
+                        RegistryKey regProtocol = regClasses?.CreateSubKey(Info.ModURIProtocol);
+                        if (regProtocol != null) {
+                            regProtocol.SetValue("", $"URL:{Info.ModURIProtocol}");
+                            regProtocol.SetValue("URL Protocol", "");
+                            regProtocol.CreateSubKey(@"shell\open\command").SetValue("", $"\"{installerPath}\" --uri %1");
+                        }
+                    } catch {
+                    }
                 }
 
                 _Install();
@@ -72,6 +93,19 @@ namespace MonoMod.Installer {
             OnStart?.Invoke();
             try {
 
+                // Sneaky step: Remove URI handler.
+                if (!string.IsNullOrEmpty(Info.ModURIProtocol) &&
+                    !string.IsNullOrEmpty(Info.ModsDir)) {
+                    try {
+                        RegistryKey regClasses = Registry
+                            .CurrentUser
+                            ?.OpenSubKey("Software", true)
+                            ?.OpenSubKey("Classes", true);
+                        regClasses?.DeleteSubKey(Info.ModURIProtocol, false);
+                    } catch {
+                    }
+                }
+
                 _Restore();
 
             } catch (Exception e) {
@@ -83,6 +117,45 @@ namespace MonoMod.Installer {
                 return;
             }
             Console.WriteLine("Finished uninstalling!");
+            OnFinish?.Invoke();
+        }
+
+        public void DownloadMod(string url) {
+            Console.WriteLine("Starting download");
+
+            Uri uri = new Uri(url);
+
+            string modRoot = Info.ModsDir;
+            if (!Directory.Exists(modRoot))
+                modRoot = Path.Combine(Info.CurrentGamePath, modRoot);
+            if (!Directory.Exists(modRoot))
+                Directory.CreateDirectory(modRoot);
+
+            string modPath = Path.Combine(modRoot, Path.GetFileName(uri.AbsolutePath));
+            if (File.Exists(modPath))
+                File.Delete(modPath);
+
+            Console.WriteLine($"Downloading: {url}");
+
+            OnStart?.Invoke();
+            try {
+
+                byte[] zipData = _Download(url);
+
+                Console.WriteLine("Writing data to file");
+                File.WriteAllBytes(modPath, zipData);
+
+            } catch (Exception e) {
+                Console.WriteLine($"Failed downloading {url}");
+                Console.WriteLine(e);
+                Console.WriteLine("Error! Please check installer-log.txt");
+                OnError?.Invoke(e);
+                if (Debugger.IsAttached)
+                    throw;
+                return;
+            }
+            Console.WriteLine($"{Path.GetFileName(modPath)} downloaded!");
+            Console.WriteLine();
             OnFinish?.Invoke();
         }
 
