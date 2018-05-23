@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -91,6 +92,11 @@ namespace MonoMod.Installer {
         public event Action<GameModInfo, string> OnChangeCurrentStatus;
 
         public abstract void Install(Action<float> progress);
+
+        public virtual bool VerifyMod(ZipArchive zip, out string name) {
+            name = null;
+            return false;
+        }
 
         public class ModVersion {
             public string Name;

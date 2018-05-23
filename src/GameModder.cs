@@ -132,17 +132,32 @@ namespace MonoMod.Installer {
                 Directory.CreateDirectory(modRoot);
 
             string modPath = Path.Combine(modRoot, Path.GetFileName(uri.AbsolutePath));
-            if (File.Exists(modPath))
-                File.Delete(modPath);
 
-            Console.WriteLine($"Downloading: {url}");
+            Console.WriteLine($"Downloading mod");
 
             OnStart?.Invoke();
             try {
 
                 byte[] zipData = _Download(url);
 
+                Console.WriteLine("Verifying");
+
+                using (MemoryStream ms = new MemoryStream(zipData))
+                using (ZipArchive zip = new ZipArchive(ms)) {
+                    string name;
+                    if (!Info.VerifyMod(zip, out name)) {
+                        Console.WriteLine("Error: Invalid mod.");
+                        OnError?.Invoke(null);
+                        return;
+                    }
+                    if (!string.IsNullOrEmpty(name)) {
+                        modPath = Path.Combine(modRoot, name + ".zip");
+                    }
+                }
+
                 Console.WriteLine("Writing data to file");
+                if (File.Exists(modPath))
+                    File.Delete(modPath);
                 File.WriteAllBytes(modPath, zipData);
 
             } catch (Exception e) {

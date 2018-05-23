@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.IO.Compression;
 
 namespace MonoMod.Installer.Everest {
     public partial class EverestInfo : GameModInfo {
@@ -245,6 +246,29 @@ namespace MonoMod.Installer.Everest {
             if (branch != "master")
                 name = $"{name} ({branch})";
             return new ModVersion { Name = name, URL = url, Version = version };
+        }
+
+        public override bool VerifyMod(ZipArchive zip, out string name) {
+            name = null;
+            bool valid = false;
+
+            foreach (ZipArchiveEntry entry in zip.Entries) {
+                if (entry.FullName == "everest.yaml" ||
+                    entry.FullName == "everest.yml") {
+                    // Hack: Let's just read the first name.
+                    using (Stream stream = entry.Open())
+                    using (StreamReader reader = new StreamReader(stream))
+                        while (!reader.EndOfStream) {
+                            string line = reader.ReadLine().Trim();
+                            if (line.Contains("Name:") && name == null) {
+                                valid = true;
+                                name = line.Substring(line.IndexOf("Name:") + 5).Trim();
+                            }
+                        }
+                }
+            }
+
+            return valid;
         }
 
     }
