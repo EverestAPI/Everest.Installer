@@ -548,7 +548,10 @@ namespace MonoMod.Installer {
         private void ProgressLaunchButton_Click(object sender, EventArgs e) {
             if (Status != InstallerStatus.Done)
                 return;
-            Process.Start(Info.CurrentExecutablePath).Dispose();
+            Process.Start(new ProcessStartInfo {
+                FileName = Info.CurrentExecutablePath,
+                WorkingDirectory = Info.CurrentGamePath
+            }).Dispose();
             Close();
         }
 
