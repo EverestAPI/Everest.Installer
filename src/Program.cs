@@ -18,7 +18,7 @@ namespace MonoMod.Installer {
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
 
             const string logDefaultName = "installer-log.txt";
-            string log = Path.GetFullPath(logDefaultName);
+            string log = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), logDefaultName);
 
             Queue<string> argsQueue = new Queue<string>(args);
             Queue<string> argsLateQueue = new Queue<string>();
