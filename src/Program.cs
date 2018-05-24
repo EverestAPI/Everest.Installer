@@ -66,6 +66,9 @@ namespace MonoMod.Installer {
                 Console.SetOut(logWriter);
 
                 GameModInfo info = new Everest.EverestInfo();
+                string protocol = info.ModURIProtocol;
+                if (!string.IsNullOrEmpty(protocol))
+                    protocol = protocol + ":";
 
                 Console.WriteLine($"{info.ModInstallerName} v{Assembly.GetEntryAssembly().GetName().Version}");
 
@@ -78,11 +81,8 @@ namespace MonoMod.Installer {
                     while (argsQueue.Count > 0) {
                         string arg = argsQueue.Dequeue();
 
-                        if (arg == "--uri" && argsQueue.Count >= 1) {
-                            arg = argsQueue.Dequeue();
-
-                            if (arg.ToLowerInvariant().StartsWith(info.ModURIProtocol.ToLowerInvariant() + ":"))
-                                arg = arg.Substring(info.ModURIProtocol.Length + 1);
+                        if (arg.ToLowerInvariant().StartsWith(protocol, StringComparison.InvariantCultureIgnoreCase)) {
+                            arg = arg.Substring(info.ModURIProtocol.Length + 1);
                             
                             if (arg.StartsWith("http://") || arg.StartsWith("https://")) {
                                 // Automatic mod .zip download.

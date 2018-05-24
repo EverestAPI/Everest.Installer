@@ -65,7 +65,7 @@ namespace MonoMod.Installer {
                         if (regProtocol != null) {
                             regProtocol.SetValue("", $"URL:{Info.ModURIProtocol}");
                             regProtocol.SetValue("URL Protocol", "");
-                            regProtocol.CreateSubKey(@"shell\open\command").SetValue("", $"\"{installerPath}\" --uri %1");
+                            regProtocol.CreateSubKey(@"shell\open\command").SetValue("", $"\"{installerPath}\" %1");
                         }
                     } catch {
                     }
