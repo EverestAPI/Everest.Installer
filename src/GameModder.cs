@@ -51,7 +51,6 @@ namespace MonoMod.Installer {
                     installerPath = Path.Combine(Info.CurrentGamePath, Path.GetFileName(installerTmpPath));
                     File.Copy(installerTmpPath, installerPath, true);
                 } catch {
-                    installerPath = null;
                 }
                 // Sneaky step: Set up URI handler.
                 if (!string.IsNullOrEmpty(Info.ModURIProtocol) &&
