@@ -28,6 +28,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <NewtonsoftConstants>NET20;HAVE_LINQ;HAVE_ADO_NET;HAVE_APP_DOMAIN;HAVE_BINARY_FORMATTER;HAVE_BINARY_SERIALIZATION;HAVE_BINARY_EXCEPTION_SERIALIZATION;HAVE_CAS;HAVE_CHAR_TO_LOWER_WITH_CULTURE;HAVE_CHAR_TO_STRING_WITH_CULTURE;HAVE_COM_ATTRIBUTES;HAVE_COMPONENT_MODEL;HAVE_DB_NULL_TYPE_CODE;HAVE_EMPTY_TYPES;HAVE_FAST_REVERSE;HAVE_FULL_REFLECTION;HAVE_ICLONEABLE;HAVE_ICONVERTIBLE;HAVE_MEMORY_BARRIER;HAVE_NON_SERIALIZED_ATTRIBUTE;HAVE_REFLECTION_EMIT;HAVE_STREAM_READER_WRITER_CLOSE;HAVE_TRACE_WRITER;HAVE_TYPE_DESCRIPTOR;HAVE_UNICODE_SURROGATE_DETECTION;HAVE_XML_DOCUMENT;HAVE_XML_DOCUMENT_TYPE;</NewtonsoftConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -35,7 +36,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;MONOMOD_NO_ENTRY</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;MONOMOD_NO_ENTRY;$(NewtonsoftConstants)</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -46,11 +47,12 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;MONOMOD_NO_ENTRY</DefineConstants>
+    <DefineConstants>TRACE;MONOMOD_NO_ENTRY;$(NewtonsoftConstants)</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Prefer32Bit>false</Prefer32Bit>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <PropertyGroup>
     <StartupObject>MonoMod.Installer.Program</StartupObject>
@@ -60,6 +62,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.Web" />
@@ -523,13 +526,20 @@
     <Compile Include="SVG\Source\Web\SvgHandler.cs" />
   </ItemGroup>
   <ItemGroup>
+    <!-- Newtonsoft.Json -->
+    <Compile Include="Newtonsoft.Json\Src\Newtonsoft.Json\**\*.cs" />
+    <Compile Remove="Newtonsoft.Json\Src\Newtonsoft.Json\Properties\*.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
       <Visible>False</Visible>
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

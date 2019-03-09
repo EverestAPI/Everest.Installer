@@ -4,3 +4,6 @@
 [submodule "SVG"]
 	path = SVG
 	url = https://github.com/vvvv/SVG.git
+[submodule "Newtonsoft.Json"]
+	path = Newtonsoft.Json
+	url = https://github.com/JamesNK/Newtonsoft.Json.git

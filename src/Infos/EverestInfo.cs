@@ -12,6 +12,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.IO.Compression;
+using Newtonsoft.Json.Linq;
 
 namespace MonoMod.Installer.Everest {
     public partial class EverestInfo : GameModInfo {
@@ -83,18 +84,39 @@ namespace MonoMod.Installer.Everest {
 
         public override List<ModVersion> ModVersions {
             get {
-                string data = null;
-                using (WebClient wc = new WebClient())
-                    data = wc.DownloadString("https://ams3.digitaloceanspaces.com/lollyde/everest-travis/builds_index.txt");
+                const int offset = 700;
+                const string artifactFormat = "https://dev.azure.com/EverestAPI/Everest/_apis/build/builds/{0}/artifacts?artifactName=main&api-version=5.0&%24format=zip";
+                const string index = "https://dev.azure.com/EverestAPI/Everest/_apis/build/builds?api-version=5.0";
 
-                string[] lines = data.Split('\n');
+                string dataRaw = null;
+                using (WebClient wc = new WebClient())
+                    dataRaw = wc.DownloadString(index);
 
                 List<ModVersion> versions = new List<ModVersion>();
-                for (int i = 0; i < lines.Length; i++) {
-                    string line = lines[i].Trim('\r', '\n').Trim();
-                    if (line.Length == 0 || line.StartsWith("#"))
+
+                JObject root = JObject.Parse(dataRaw);
+                JArray list = root["value"] as JArray;
+                foreach (JObject build in list) {
+                    if (build["status"].ToObject<string>() != "completed" || build["result"].ToObject<string>() != "succeeded")
                         continue;
-                    versions.Add(ParseLine(line, "https://ams3.digitaloceanspaces.com"));
+
+                    string reason = build["reason"].ToObject<string>();
+                    if (reason != "manual" && reason != "individualCI")
+                        continue;
+
+                    int id = build["id"].ToObject<int>();
+                    string branch = build["sourceBranch"].ToObject<string>().Replace("refs/heads/", "");
+                    string url = string.Format(artifactFormat, id);
+
+                    string name = (id + offset).ToString();
+                    if (branch != "master")
+                        name = $"{name} ({branch})";
+
+                    versions.Add(new ModVersion() {
+                        Name = name,
+                        URL = url,
+                        Version = new Version(1, 0, id)
+                    });
                 }
 
                 return versions;
@@ -206,46 +228,6 @@ namespace MonoMod.Installer.Everest {
                     Console.WriteLine(e.ToString());
                 }
             }
-        }
-
-        // Copy-paste of Everest's updater version parser.
-        private static ModVersion ParseLine(string line, string root) {
-            string[] split = line.Split(' ');
-            if (split.Length < 2 || split.Length > 3)
-                throw new Exception("Version list format incompatible!");
-
-            string url = split[0];
-            if (!url.StartsWith("http://") && !url.StartsWith("https://"))
-                // The index contains a relative path.
-                url = root + url;
-
-            if (!url.EndsWith("/" + split[1]))
-                throw new Exception("URL (first column) must end in filename (second column)!");
-
-            string name = split[1];
-            string branch = "master";
-
-            if (name.EndsWith(".zip"))
-                name = name.Substring(0, name.Length - 4);
-
-            if (name.StartsWith("build-"))
-                name = name.Substring(6);
-
-            int indexOfBranch = name.IndexOf('-');
-            if (indexOfBranch != -1) {
-                branch = name.Substring(indexOfBranch + 1);
-                name = name.Substring(0, indexOfBranch);
-            }
-
-            Version version;
-            if (split.Length == 3)
-                version = new Version(split[2]);
-            else
-                version = new Version(0, 0, int.Parse(Regex.Match(split[1], @"\d+").Value));
-
-            if (branch != "master")
-                name = $"{name} ({branch})";
-            return new ModVersion { Name = name, URL = url, Version = version };
         }
 
         public override bool VerifyMod(ZipArchive zip, out string name) {

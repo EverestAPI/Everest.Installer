@@ -184,16 +184,27 @@ namespace MonoMod.Installer {
                 int i = 0;
                 foreach (ZipArchiveEntry entry in zip.Entries) {
                     OnProgress?.Invoke(Status.Unpack, (i + 1) / (float) zip.Entries.Count);
-                    string to = Path.Combine(root, entry.Name);
-                    string toParent = Path.GetDirectoryName(to);
-                    Console.WriteLine($"{entry.Name} -> {to}");
-                    if (!Directory.Exists(toParent))
-                        Directory.CreateDirectory(toParent);
-                    if (File.Exists(to))
-                        File.Delete(to);
-                    using (FileStream fs = File.OpenWrite(to))
-                    using (Stream compressed = entry.Open())
-                        compressed.CopyTo(fs);
+
+                    if (!entry.Name.EndsWith("/") && entry.Length != 0) {
+                        string entryName = entry.Name;
+                        if (entryName.StartsWith("main/"))
+                            entryName = entryName.Substring(5);
+
+                        string to = Path.Combine(root, entryName);
+                        string toParent = Path.GetDirectoryName(to);
+                        Console.WriteLine($"{entry.Name} -> {to}");
+
+                        if (!Directory.Exists(toParent))
+                            Directory.CreateDirectory(toParent);
+
+                        if (File.Exists(to))
+                            File.Delete(to);
+
+                        using (FileStream fs = File.OpenWrite(to))
+                        using (Stream compressed = entry.Open())
+                            compressed.CopyTo(fs);
+                    }
+
                     i++;
                 }
             }
@@ -274,77 +285,91 @@ namespace MonoMod.Installer {
 
             // The following blob of code comes from the old ETGMod.Installer.
 
-            byte[] data = null;
-
             Console.WriteLine($"Downloading {url}");
 
-            DateTime timeStart = DateTime.Now;
-            using (WebClient wc = new WebClient()) {
-                using (Stream s = wc.OpenRead(url)) {
-                    long sLength;
-                    if (s.CanSeek) {
-                        // Mono
-                        sLength = s.Length;
-                    } else {
-                        // .NET
-                        HttpWebRequest request = (HttpWebRequest) WebRequest.Create(url);
-                        request.UserAgent = $"MonoMod.Installer {Assembly.GetEntryAssembly().GetName().Version}";
-                        request.Method = "HEAD";
-                        using (HttpWebResponse response = (HttpWebResponse) request.GetResponse()) {
-                            sLength = response.ContentLength;
+            using (MemoryStream copy = new MemoryStream()) {
+                DateTime timeStart = DateTime.Now;
+                using (WebClient wc = new WebClient()) {
+                    using (Stream input = wc.OpenRead(url)) {
+                        long length;
+                        if (input.CanSeek) {
+                            // Mono
+                            length = input.Length;
+                        } else {
+                            // .NET
+                            try {
+                                HttpWebRequest request = (HttpWebRequest) WebRequest.Create(url);
+                                request.UserAgent = $"MonoMod.Installer {Assembly.GetEntryAssembly().GetName().Version}";
+                                request.Method = "HEAD";
+                                using (HttpWebResponse response = (HttpWebResponse) request.GetResponse()) {
+                                    length = response.ContentLength;
+                                }
+                            } catch (Exception) {
+                                length = 0;
+                            }
                         }
-                    }
-                    Console.WriteLine($"{sLength} bytes");
-                    data = new byte[sLength];
+                        Console.WriteLine($"{length} bytes");
 
-                    long progressSize = sLength;
-                    int progressScale = 1;
-                    while (progressSize > int.MaxValue) {
-                        progressScale *= 10;
-                        progressSize = sLength / progressScale;
-                    }
-
-                    OnProgress?.Invoke(Status.Download, 0f);
-
-                    DateTime timeLast = timeStart;
-
-                    int read;
-                    int readForSpeed = 0;
-                    int pos = 0;
-                    int speed = 0;
-                    TimeSpan td;
-                    while (pos < data.Length) {
-                        read = s.Read(data, pos, Math.Min(2048, data.Length - pos));
-                        pos += read;
-                        readForSpeed += read;
-
-                        td = (DateTime.Now - timeLast);
-                        if (td.TotalMilliseconds > 100) {
-                            speed = (int) ((readForSpeed / 1024D) / td.TotalSeconds);
-                            readForSpeed = 0;
-                            timeLast = DateTime.Now;
+                        long progressSize = length;
+                        int progressScale = 1;
+                        while (progressSize > int.MaxValue) {
+                            progressScale *= 10;
+                            progressSize = length / progressScale;
                         }
 
-                        OnProgress?.Invoke(Status.Download, (float) ((pos / progressScale) / (double) progressSize));
-                        LogWriter.OnWriteLine?.Invoke(
-                            "Downloading - " +
-                            (int) (Math.Round(100D * ((pos / progressScale) / (double) progressSize))) + "%, " +
-                            speed + " KiB/s"
-                        );
-                    }
+                        OnProgress?.Invoke(Status.Download, 0f);
 
+                        DateTime timeLast = timeStart;
+
+                        byte[] buffer = new byte[4096];
+                        DateTime timeLastSpeed = timeStart;
+                        int read = 1;
+                        int readForSpeed = 0;
+                        int pos = 0;
+                        int speed = 0;
+                        int count = 0;
+                        TimeSpan td;
+                        while (read > 0) {
+                            count = length > 0 ? (int) Math.Min(buffer.Length, length - pos) : buffer.Length;
+                            read = input.Read(buffer, 0, count);
+                            copy.Write(buffer, 0, read);
+                            pos += read;
+                            readForSpeed += read;
+
+                            td = (DateTime.Now - timeLast);
+                            if (td.TotalMilliseconds > 100) {
+                                speed = (int) ((readForSpeed / 1024D) / td.TotalSeconds);
+                                readForSpeed = 0;
+                                timeLast = DateTime.Now;
+                            }
+
+                            if (length > 0) {
+                                OnProgress?.Invoke(Status.Download, (float) ((pos / progressScale) / (double) progressSize));
+                                LogWriter.OnWriteLine?.Invoke(
+                                    $"Downloading: {((int) Math.Floor(100D * (pos / (double) length)))}% @ {speed} KiB/s"
+                                );
+                            } else {
+                                OnProgress?.Invoke(Status.Download, 1f);
+                                LogWriter.OnWriteLine?.Invoke(
+                                    $"Downloading: {((int) Math.Floor(pos / 1000D))}KiB @ {speed} KiB/s"
+                                );
+                            }
+                        }
+
+                    }
                 }
+
+                OnProgress?.Invoke(Status.Download, 1f);
+
+                byte[] data = copy.ToArray();
+                string logSize = (data.Length / 1024D).ToString(CultureInfo.InvariantCulture);
+                logSize = logSize.Substring(0, Math.Min(logSize.IndexOf('.') + 3, logSize.Length));
+                string logTime = (DateTime.Now - timeStart).TotalSeconds.ToString(CultureInfo.InvariantCulture);
+                logTime = logTime.Substring(0, Math.Min(logTime.IndexOf('.') + 3, logTime.Length));
+                Console.WriteLine($"Downloaded {logSize} KiB in {logTime} seconds.");
+
+                return data;
             }
-
-            OnProgress?.Invoke(Status.Download, 1f);
-
-            string logSize = (data.Length / 1024D).ToString(CultureInfo.InvariantCulture);
-            logSize = logSize.Substring(0, Math.Min(logSize.IndexOf('.') + 3, logSize.Length));
-            string logTime = (DateTime.Now - timeStart).TotalSeconds.ToString(CultureInfo.InvariantCulture);
-            logTime = logTime.Substring(0, Math.Min(logTime.IndexOf('.') + 3, logTime.Length));
-            Console.WriteLine($"Downloaded {logSize} KiB in {logTime} seconds.");
-
-            return data;
         }
 
         public enum Status {
