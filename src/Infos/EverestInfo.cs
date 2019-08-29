@@ -77,7 +77,8 @@ namespace MonoMod.Installer.Everest {
             get {
                 return new Dictionary<string, string>() {
                     { "local", "Celeste.exe" },
-                    { "steam", "Celeste" }
+                    { "steam", "Celeste" },
+                    { "epic", "Celeste" }
                 };
             }
         }
