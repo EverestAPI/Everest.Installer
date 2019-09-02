@@ -21,6 +21,7 @@ namespace MonoMod.Installer {
                     continue;
                 Finders.Add((GameFinder) type.GetConstructor(_EmptyTypeArray).Invoke(_EmptyObjectArray));
             }
+            Finders.Sort((a, b) => a.Priority.CompareTo(b.Priority));
         }
 
         public static string Find(GameModInfo info) {
