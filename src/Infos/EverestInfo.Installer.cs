@@ -4,6 +4,7 @@ using MonoMod.RuntimeDetour;
 using MonoMod.Utils;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -53,6 +54,48 @@ namespace MonoMod.Installer.Everest {
 
         class MiniInstallerProxy : MarshalByRefObject {
             public void Boot(MiniInstallerBridge bridge) {
+                // Check for Core / native MiniInstaller builds
+                string nativeInstallerPath = Path.Combine(bridge.Root, Environment.Is64BitOperatingSystem ?
+                    "MiniInstaller-win64.exe" :
+                    "MiniInstaller-win86.exe"
+                );
+                if (File.Exists(nativeInstallerPath)) {
+                    // Launch the MiniInstaller process
+                    using (TextWriter fileWriter = new MiniInstallerBridgeWriter(bridge))
+                    using (LogWriter logWriter = new LogWriter
+                    {
+                        STDOUT = Console.Out,
+                        File = fileWriter
+                    })
+                    {
+                        Process installerProc = new Process()
+                        {
+                            StartInfo = new ProcessStartInfo()
+                            {
+                                WorkingDirectory = bridge.Root,
+                                FileName = nativeInstallerPath,
+                                UseShellExecute = false,
+
+                                RedirectStandardInput = true,
+                                RedirectStandardOutput = true,
+                                RedirectStandardError = true
+                            }
+                        };
+
+                        installerProc.OutputDataReceived += (_, e) => logWriter.WriteLine(e.Data);
+                        installerProc.ErrorDataReceived += (_, e) => logWriter.WriteLine(e.Data);
+
+                        installerProc.Start();
+                        installerProc.BeginOutputReadLine();
+                        installerProc.BeginErrorReadLine();
+
+                        installerProc.WaitForExit();
+                        if (installerProc.ExitCode != 0)
+                            throw new Exception($"Return code != 0, but {installerProc.ExitCode}");
+                    }
+                    return;
+                }
+
                 Assembly installerAssembly = Assembly.LoadFrom(Path.Combine(bridge.Root, "MiniInstaller.exe"));
                 Type installerType = installerAssembly.GetType("MiniInstaller.Program");
 

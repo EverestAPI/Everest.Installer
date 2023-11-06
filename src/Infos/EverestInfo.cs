@@ -62,14 +62,33 @@ namespace MonoMod.Installer.Everest {
 
         public override ModBackup[] Backups {
             get {
-                if (!string.IsNullOrEmpty(ExecutableDir))
-                    return new ModBackup[] {
-                        new ModBackup { From = Path.Combine(ExecutableDir, ExecutableName), To = Path.Combine(ExecutableDir, Path.Combine("orig", ExecutableName)) }
-                    };
+                string root = ExecutableDir;
+                if (string.IsNullOrEmpty(root))
+                    root = "";
 
-                return new ModBackup[] {
-                    new ModBackup { From = ExecutableName, To = Path.Combine("orig", ExecutableName) }
-                };
+                List<ModBackup> backups = new List<ModBackup>();
+
+                string origDir = Path.GetFullPath(Path.Combine(CurrentGamePath, root, "orig"));
+                if (Directory.Exists(origDir))
+                    backups.AddRange(Directory.EnumerateFiles(origDir, "*", SearchOption.AllDirectories).Select(file =>
+                        {
+                            if (file.StartsWith(origDir))
+                                file = file.Substring(origDir.Length + 1);
+                            if (file.StartsWith("Content"))
+                                return null;
+
+                            return new ModBackup
+                            {
+                                From = Path.Combine(root, file),
+                                To = Path.Combine(root, "orig", file)
+                            };
+                        }
+                    ).Where(b => b != null));
+
+                if (!File.Exists(Path.Combine(origDir, ExecutableName)))
+                    backups.Add(new ModBackup { From = Path.Combine(root, ExecutableName), To = Path.Combine(root, "orig", ExecutableName) });
+
+                return backups.ToArray();
             }
         }
 
@@ -139,8 +158,13 @@ namespace MonoMod.Installer.Everest {
                     return;
                 }
 
+                bool tryCoreDll = false;
+                retry:;
                 try {
-                    using (ModuleDefinition game = ModuleDefinition.ReadModule(CurrentExecutablePath)) {
+                    using (ModuleDefinition game = ModuleDefinition.ReadModule(tryCoreDll ?
+                        Path.ChangeExtension(CurrentExecutablePath, ".dll") :
+                        CurrentExecutablePath
+                    )) {
                         TypeDefinition t_Celeste = game.GetType("Celeste.Celeste");
                         if (t_Celeste == null) {
                             CurrentStatus = "Not Celeste!";
@@ -222,6 +246,12 @@ namespace MonoMod.Installer.Everest {
                         CurrentStatus = status;
                     }
                 } catch (Exception e) {
+                    if (!tryCoreDll)
+                    {
+                        tryCoreDll = true;
+                        goto retry;
+                    }
+
                     CurrentStatus = "Error - check log";
                     base.CurrentExecutablePath = null;
                     CurrentInstalledModVersion = null;

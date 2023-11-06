@@ -185,14 +185,14 @@ namespace MonoMod.Installer {
                 foreach (ZipArchiveEntry entry in zip.Entries) {
                     OnProgress?.Invoke(Status.Unpack, (i + 1) / (float) zip.Entries.Count);
 
-                    if (!entry.Name.EndsWith("/") && entry.Length != 0) {
-                        string entryName = entry.Name;
+                    if (!entry.FullName.EndsWith("/") && entry.Length != 0) {
+                        string entryName = entry.FullName;
                         if (entryName.StartsWith("main/"))
                             entryName = entryName.Substring(5);
 
                         string to = Path.Combine(root, entryName);
                         string toParent = Path.GetDirectoryName(to);
-                        Console.WriteLine($"{entry.Name} -> {to}");
+                        Console.WriteLine($"{entry.FullName} -> {to}");
 
                         if (!Directory.Exists(toParent))
                             Directory.CreateDirectory(toParent);
@@ -261,11 +261,6 @@ namespace MonoMod.Installer {
                 GameModInfo.ModBackup backup = backups[i];
                 string from = Path.Combine(root, backup.From);
                 string to = Path.Combine(root, backup.To);
-
-                if (!File.Exists(to)) {
-                    Console.WriteLine($"File not found, skipping: {backup.From}");
-                    continue;
-                }
 
                 Console.WriteLine($"{backup.From} <- {backup.To}");
                 string dir = Path.GetDirectoryName(from);
